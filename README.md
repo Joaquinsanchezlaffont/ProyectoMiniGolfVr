@@ -5,12 +5,12 @@ Prototipo de un hoyo para Unity **6000.6.2f1**, realizado a partir del [tutorial
 ## Abrir el proyecto
 
 1. Descargá o cloná este repositorio y abrí la **carpeta raíz** en Unity Hub. Debe contener `Assets`, `Packages` y `ProjectSettings`.
-2. Esperá a que Unity instale los paquetes y compile. Un script de Editor importa automáticamente **Starter Assets** de XR Interaction Toolkit 3.2.1 y crea `Assets/Scenes/MinigolfVR.unity`, los prefabs en `Assets/Models` y los colores `.mat` en `Assets/Materials`. Unity abre la escena si estabas en una escena nueva o en `SampleScene` sin modificar.
+2. Esperá a que Unity instale los paquetes y compile. Un script de Editor importa automáticamente **Starter Assets** de XR Interaction Toolkit 3.2.1, crea `Assets/Scenes/MinigolfVR.unity` y los prefabs en `Assets/Models`, y prepara los materiales `.mat` ya incluidos en `Assets/Materials`. Unity abre la escena si estabas en una escena nueva o en `SampleScene` sin modificar.
 3. Si no se abre, elegí **Minigolf VR > Abrir escena inicial**. Si la escena todavía no existe, elegí **Minigolf VR > Crear escena inicial**. Si Starter Assets solicita importar una muestra, aceptá y esperá a que termine la compilación; luego repetí esa opción del menú.
 4. Abrí **Edit > Project Settings > XR Plug-in Management** y activá **OpenXR** en la pestaña **Windows, Mac, Linux**. En OpenXR, habilitá el perfil del control de tu visor y ejecutá **Project Validation > Fix All**. Asegurate de que en tu computadora haya un runtime OpenXR activo y el visor conectado.
 5. Abrí la escena `MinigolfVR` y presioná **Play**. Es un proyecto para jugar desde la PC con el visor conectado; no tiene compilación para Android.
 
-Si ya tenés un proyecto de Unity abierto en tu computadora, incorporá `Assets` y las dependencias de `Packages/manifest.json` a ese proyecto. La escena y los materiales se generan al abrirlo en el Editor. Tras revisar la escena generada, subí también sus `.unity`, `.prefab`, `.mat` y `.meta` a GitHub para conservar las modificaciones que hagas en Unity.
+Si ya tenés un proyecto de Unity abierto en tu computadora, incorporá `Assets` y las dependencias de `Packages/manifest.json` a ese proyecto. La escena y los prefabs se generan al abrirlo en el Editor. Tras revisar la escena generada, subí también sus `.unity`, `.prefab` y `.meta` a GitHub para conservar las modificaciones que hagas en Unity.
 
 ## Cómo jugar
 
@@ -25,7 +25,7 @@ El tutorial muestra la instalación de OpenXR, XR Interaction Toolkit y Starter 
 | --- | --- |
 | `Assets/Scripts` | Golpes, física, puntaje, turnos, timer y controles de PC y VR. |
 | `Assets/Models` | Un obstáculo `.obj` editable en Blender. Unity también crea ahí los prefabs de pelota, palo y bandera. |
-| `Assets/Materials` | Unity genera `.mat` para pasto verde, bordes azules, obstáculo celeste, pelota blanca, bandera roja e interior del hoyo. |
+| `Assets/Materials` | Archivos `.mat` para pasto verde, bordes azules, obstáculo celeste, pelota blanca, bandera roja e interior del hoyo. |
 | `Assets/Scenes` | Un solo mapa: `MinigolfVR.unity`, creado al abrir el proyecto en Unity. |
 | `Assets/Editor` | Generador de la escena, prefabs y materiales editables. |
 

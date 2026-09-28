@@ -213,10 +213,18 @@ internal static class MiniGolfProjectBuilder
     {
         string path = Materials + name + ".mat";
         Material material = AssetDatabase.LoadAssetAtPath<Material>(path);
-        if (material != null) return material;
-
         Shader shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
         if (shader == null) shader = Shader.Find("Sprites/Default");
+        if (material != null)
+        {
+            // Materials committed to GitHub use Standard; switch to URP when the
+            // student's existing Unity project has the URP Lit shader installed.
+            if (material.shader != shader) material.shader = shader;
+            material.color = color;
+            if (material.HasProperty("_BaseColor")) material.SetColor("_BaseColor", color);
+            EditorUtility.SetDirty(material);
+            return material;
+        }
         material = new Material(shader) { name = name, color = color };
         if (material.HasProperty("_BaseColor")) material.SetColor("_BaseColor", color);
         AssetDatabase.CreateAsset(material, path);
