@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4c86f37b8f3d5c8e8029266b70dffb23
+ModelImporter:
+  serializedVersion: 22200
+  internalIDToNameTable: []
+  externalObjects: {}
+  materials:
+    materialImportMode: 0
+  meshes:
+    globalScale: 1
+    useFileScale: 1
+    addColliders: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
