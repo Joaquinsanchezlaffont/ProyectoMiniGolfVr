@@ -1,10 +1,10 @@
 # Minigolf VR
 
-Prototipo de un hoyo para Unity **6000.6.2f1**, realizado a partir del [tutorial de VR en Unity 6 de Valem](https://youtu.be/H8dWVlZKQu4). Joaquín Sánchez Laffont trabaja en Unity y Sebastián Ángel Warman en los modelos de Blender.
+Prototipo de un hoyo para Unity **6000.5.1f1**, la versión instalada en la PC del proyecto, realizado a partir del [tutorial de VR en Unity 6 de Valem](https://youtu.be/H8dWVlZKQu4). Joaquín Sánchez Laffont trabaja en Unity y Sebastián Ángel Warman en los modelos de Blender.
 
 ## Abrir el proyecto
 
-1. Descargá o cloná este repositorio y abrí la **carpeta raíz** en Unity Hub. Debe contener `Assets`, `Packages` y `ProjectSettings`.
+1. Descargá o cloná este repositorio **ProyectoMiniGolfVr**, descomprimilo y abrí la **carpeta raíz** en Unity Hub. Debe contener `Assets`, `Packages` y `ProjectSettings`. Si arriba de Unity dice `MiniGolfVROriginal`, tenés abierto el proyecto anterior: cerralo y abrí esta carpeta desde Unity Hub.
 2. Esperá a que Unity instale los paquetes y compile. Un script de Editor importa automáticamente **Starter Assets** de XR Interaction Toolkit 3.2.1, crea `Assets/Scenes/MinigolfVR.unity` y los prefabs en `Assets/Models`, y prepara los materiales `.mat` ya incluidos en `Assets/Materials`. Unity abre la escena si estabas en una escena nueva o en `SampleScene` sin modificar.
 3. Si no se abre, elegí **Minigolf VR > Abrir escena inicial**. Si la escena todavía no existe, elegí **Minigolf VR > Crear escena inicial**. Si Starter Assets solicita importar una muestra, aceptá y esperá a que termine la compilación; luego repetí esa opción del menú.
 4. Abrí **Edit > Project Settings > XR Plug-in Management** y activá **OpenXR** en la pestaña **Windows, Mac, Linux**. En OpenXR, habilitá el perfil del control de tu visor y ejecutá **Project Validation > Fix All**. Asegurate de que en tu computadora haya un runtime OpenXR activo y el visor conectado.
