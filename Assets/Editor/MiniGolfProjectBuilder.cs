@@ -17,7 +17,7 @@ internal static class MiniGolfProjectBuilder
     private const string ScenePath = "Assets/Scenes/MinigolfVR.unity";
     private const string Materials = "Assets/Materials/";
     private const string Models = "Assets/Models/";
-    private const string XriVersion = "3.2.1";
+    private const string XriVersion = "3.5.1";
 
     private static Material grass;
     private static Material rails;
