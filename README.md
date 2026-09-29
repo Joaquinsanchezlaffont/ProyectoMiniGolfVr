@@ -14,6 +14,14 @@ Si abriste una descarga anterior y la consola dice `Cannot create a new scene ad
 
 Si ya tenés un proyecto de Unity abierto en tu computadora, incorporá `Assets` y las dependencias de `Packages/manifest.json` a ese proyecto. La escena y los prefabs se generan al abrirlo en el Editor. Tras revisar la escena generada, subí también sus `.unity`, `.prefab` y `.meta` a GitHub para conservar las modificaciones que hagas en Unity.
 
+### Si en las gafas se ve el mapa pero no podés jugar
+
+1. En la PC, abrí **Meta Horizon Link > Settings > General** y comprobá que **OpenXR Runtime** indique Meta Horizon Link como activo. En Unity, activá **OpenXR** para **Windows, Mac, Linux** y agregá **Oculus Touch Controller Profile** en **Enabled Interaction Profiles**.
+2. Abrí `Assets/Scenes/MinigolfVR.unity` y pulsá el triángulo **Play** en la barra superior de Unity: debe quedar azul. Si dentro de las gafas ves el escritorio y los menús de Unity como una pantalla flotante, estás mirando el escritorio de Link; el juego debe aparecer como escena inmersiva.
+3. Mové la cabeza para comprobar que cambia la vista. Acercá una mano al mango del palo y apretá **grip** (botón lateral). Si la vista sigue fija o no aparecen los controles, revisá la consola de Unity y la conexión de Quest Link antes de intentar golpear la pelota.
+
+Si abriste el proyecto desde un ZIP anterior, podés actualizar solo `Assets/Scripts/MiniGolfRig.cs` desde este repositorio y conservar la escena que Unity ya creó.
+
 ## Cómo jugar
 
 - **En VR:** acercate al palo y agarralo con **grip**. Mové el control como un palo de minigolf para golpear la pelota. El XR Origin de Starter Assets tiene controles de mano, desplazamiento suave y teletransporte sobre el pasto de la pista. El puntaje se ve delante del visor. Antes del primer tiro, el **botón primario izquierdo** cambia entre 1 y 4 jugadores; el **botón secundario izquierdo** reinicia la partida. Al cambiar de turno, se puede pasar el mismo visor al siguiente jugador.

@@ -13,7 +13,9 @@ namespace MiniGolfVR
         private bool previousPrimary;
         private bool previousSecondary;
 
-        public bool VrActive { get; private set; }
+        // A headset can render through OpenXR even if its position feature is
+        // unavailable for a frame. Use the active XR display to choose the mode.
+        public bool VrActive => XRSettings.isDeviceActive;
 
         public void Configure(Transform cameraTransform, MiniGolfGame owner)
         {
@@ -39,17 +41,16 @@ namespace MiniGolfVR
         public void SetStation(Vector3 tee)
         {
             station = tee;
-            transform.position = new Vector3(tee.x, 0f, tee.z - 1.35f);
+            // Keep the player inside the starting rail and within reach of the club.
+            transform.position = new Vector3(tee.x, 0f, tee.z - 0.58f);
             if (!VrActive) PlaceDesktopCamera();
         }
 
         private void LateUpdate()
         {
-            InputDevice headset = InputDevices.GetDeviceAtXRNode(XRNode.Head);
-            VrActive = headset.isValid &&
-                headset.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 _);
-            if (!VrActive) previousPrimary = previousSecondary = false;
-            if (!VrActive) PlaceDesktopCamera();
+            if (VrActive) return;
+            previousPrimary = previousSecondary = false;
+            PlaceDesktopCamera();
         }
 
         private void PlaceDesktopCamera()
