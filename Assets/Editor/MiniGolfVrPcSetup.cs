@@ -4,6 +4,7 @@ using UnityEditor.SceneManagement;
 using UnityEditor.XR.Management;
 using UnityEditor.XR.Management.Metadata;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using UnityEngine.XR.Management;
 using UnityEngine.XR.OpenXR;
@@ -44,6 +45,16 @@ internal static class MiniGolfVrPcSetup
         }
 
         if (!Prepare(true)) return;
+        if (SystemInfo.graphicsDeviceType != GraphicsDeviceType.Direct3D11)
+        {
+            Debug.LogError("Minigolf VR: este Editor está usando " +
+                SystemInfo.graphicsDeviceType +
+                ". La prueba con Quest Link requiere reiniciar Unity para usar Direct3D11; evitamos iniciar VR con Direct3D12 porque produjo un cierre del Editor en esta PC.");
+            EditorUtility.DisplayDialog("Reiniciá Unity para jugar en VR",
+                "El proyecto ya está configurado para Direct3D11. Cerrá Unity, abrí de nuevo esta misma carpeta desde Unity Hub y elegí Minigolf VR > Jugar con Quest Link.",
+                "Entendido");
+            return;
+        }
         if (!File.Exists(ScenePath))
         {
             Debug.LogError("Minigolf VR: falta la escena. Elegí Minigolf VR > Crear escena inicial.");
@@ -66,6 +77,7 @@ internal static class MiniGolfVrPcSetup
     {
         try
         {
+            PrepareDirect3D11();
             XRGeneralSettingsPerBuildTarget perTarget = GetOrCreateSettings();
             if (perTarget.SettingsForBuildTarget(Target) == null)
                 perTarget.CreateDefaultSettingsForBuildTarget(Target);
@@ -133,6 +145,23 @@ internal static class MiniGolfVrPcSetup
             Debug.LogError("Minigolf VR: no se pudo preparar OpenXR. " + exception);
             return false;
         }
+    }
+
+    private static void PrepareDirect3D11()
+    {
+        // This PC's Editor.log shows a native D3D12 GPU error while OpenXR
+        // creates the eye textures. Player settings determine the Editor's
+        // graphics API on its next launch; a running Editor still needs a restart.
+        const BuildTarget windows = BuildTarget.StandaloneWindows64;
+        GraphicsDeviceType[] apis = PlayerSettings.GetGraphicsAPIs(windows);
+        if (!PlayerSettings.GetUseDefaultGraphicsAPIs(windows) &&
+            apis.Length == 1 && apis[0] == GraphicsDeviceType.Direct3D11)
+            return;
+
+        PlayerSettings.SetUseDefaultGraphicsAPIs(windows, false);
+        PlayerSettings.SetGraphicsAPIs(windows,
+            new[] { GraphicsDeviceType.Direct3D11 });
+        Debug.LogWarning("Minigolf VR: Direct3D11 configurado para Windows. Reiniciá Unity antes de probar Quest Link.");
     }
 
     private static XRGeneralSettingsPerBuildTarget GetOrCreateSettings()

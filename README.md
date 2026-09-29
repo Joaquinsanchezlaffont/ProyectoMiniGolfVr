@@ -7,7 +7,7 @@ Prototipo de un hoyo para Unity **6000.5.1f1**, la versión instalada en la PC d
 1. Descargá o cloná este repositorio **ProyectoMiniGolfVr**, descomprimilo y abrí la **carpeta raíz** en Unity Hub. Debe contener `Assets`, `Packages` y `ProjectSettings`. Si arriba de Unity dice `MiniGolfVROriginal`, tenés abierto el proyecto anterior: cerralo y abrí esta carpeta desde Unity Hub.
 2. Esperá a que Unity instale los paquetes y compile. Un script de Editor importa automáticamente **Starter Assets** de XR Interaction Toolkit 3.5.1, crea `Assets/Scenes/MinigolfVR.unity` y los prefabs en `Assets/Models`, y prepara los materiales `.mat` ya incluidos en `Assets/Materials`. Unity abre la escena si estabas en una escena nueva o en `SampleScene` sin modificar.
 3. Si no se abre, elegí **Minigolf VR > Abrir escena inicial**. Si la escena todavía no existe, elegí **Minigolf VR > Crear escena inicial**. Si Starter Assets solicita importar una muestra, aceptá y esperá a que termine la compilación; luego repetí esa opción del menú.
-4. En Windows, el proyecto prepara automáticamente **OpenXR** para PC, la inicialización XR y el perfil **Oculus Touch**. En **Meta Horizon Link > Settings > General**, comprobá que **OpenXR Runtime** tenga Meta Horizon Link activo. Conectá las gafas por Quest Link.
+4. En Windows, el proyecto prepara automáticamente **OpenXR** para PC, la inicialización XR, el perfil **Oculus Touch** y **Direct3D11**. La PC de prueba sufrió un cierre del Editor al crear las imágenes del visor con Direct3D12. Si Unity avisa que cambió la API gráfica, **cerrá y volvé a abrir el mismo proyecto** antes de tocar Play. En **Meta Horizon Link > Settings > General**, comprobá que **OpenXR Runtime** tenga Meta Horizon Link activo. Conectá las gafas por Quest Link.
 5. En Unity elegí **Minigolf VR > Jugar con Quest Link**. Esta opción abre `MinigolfVR.unity` y activa el Play del Editor. También podés abrir la escena y pulsar el triángulo de la barra superior. Es un proyecto para jugar desde la PC con el visor conectado; no tiene compilación para Android.
 
 Si abriste una descarga anterior y la consola dice `Cannot create a new scene additively with an untitled scene unsaved`, guardá la escena vacía con **File > Save As...** como `Assets/Scenes/Borrador.unity`. Después elegí **Minigolf VR > Crear escena inicial** y **Minigolf VR > Abrir escena inicial**. La versión actual ya permite crear el mapa directamente desde la escena `Untitled` sin modificar.
@@ -21,6 +21,10 @@ Si ya tenés un proyecto de Unity abierto en tu computadora, incorporá `Assets`
 3. Mové la cabeza para comprobar que cambia la vista. Acercá una mano al mango del palo y apretá **grip** (botón lateral). Si la vista sigue fija o no aparecen los controles, revisá la consola de Unity y la conexión de Quest Link antes de intentar golpear la pelota.
 
 La escena creada dentro de Unity se puede conservar al actualizar los scripts. No borres `Assets/Scenes/MinigolfVR.unity` de tu computadora.
+
+### Si Unity se cierra al entrar en VR
+
+En la PC de prueba, `Logs/Editor.log` registró `d3d12: Unrecoverable GPU device error` mientras OpenXR creaba las texturas de los ojos. El script de preparación configura Direct3D11 para Windows y el menú **Jugar con Quest Link** impide iniciar desde un Editor que siga ejecutándose con Direct3D12. Cerrá y abrí Unity una vez para aplicar el cambio. Si estás usando una copia anterior del proyecto, en **Edit > Project Settings > Player > Other Settings > Rendering** desmarcá **Auto Graphics API for Windows/Mac/Linux**, dejá **Direct3D11** como única API de Windows y reiniciá Unity. No hace falta volver a generar el mapa.
 
 ## Cómo jugar
 
