@@ -7,8 +7,8 @@ Prototipo de un hoyo para Unity **6000.5.1f1**, la versión instalada en la PC d
 1. Descargá o cloná este repositorio **ProyectoMiniGolfVr**, descomprimilo y abrí la **carpeta raíz** en Unity Hub. Debe contener `Assets`, `Packages` y `ProjectSettings`. Si arriba de Unity dice `MiniGolfVROriginal`, tenés abierto el proyecto anterior: cerralo y abrí esta carpeta desde Unity Hub.
 2. Esperá a que Unity instale los paquetes y compile. Un script de Editor importa automáticamente **Starter Assets** de XR Interaction Toolkit 3.5.1, crea `Assets/Scenes/MinigolfVR.unity` y los prefabs en `Assets/Models`, y prepara los materiales `.mat` ya incluidos en `Assets/Materials`. Unity abre la escena si estabas en una escena nueva o en `SampleScene` sin modificar.
 3. Si no se abre, elegí **Minigolf VR > Abrir escena inicial**. Si la escena todavía no existe, elegí **Minigolf VR > Crear escena inicial**. Si Starter Assets solicita importar una muestra, aceptá y esperá a que termine la compilación; luego repetí esa opción del menú.
-4. Abrí **Edit > Project Settings > XR Plug-in Management** y activá **OpenXR** en la pestaña **Windows, Mac, Linux**. En OpenXR, habilitá el perfil del control de tu visor y ejecutá **Project Validation > Fix All**. Asegurate de que en tu computadora haya un runtime OpenXR activo y el visor conectado.
-5. Abrí la escena `MinigolfVR` y presioná **Play**. Es un proyecto para jugar desde la PC con el visor conectado; no tiene compilación para Android.
+4. En Windows, el proyecto prepara automáticamente **OpenXR** para PC, la inicialización XR y el perfil **Oculus Touch**. En **Meta Horizon Link > Settings > General**, comprobá que **OpenXR Runtime** tenga Meta Horizon Link activo. Conectá las gafas por Quest Link.
+5. En Unity elegí **Minigolf VR > Jugar con Quest Link**. Esta opción abre `MinigolfVR.unity` y activa el Play del Editor. También podés abrir la escena y pulsar el triángulo de la barra superior. Es un proyecto para jugar desde la PC con el visor conectado; no tiene compilación para Android.
 
 Si abriste una descarga anterior y la consola dice `Cannot create a new scene additively with an untitled scene unsaved`, guardá la escena vacía con **File > Save As...** como `Assets/Scenes/Borrador.unity`. Después elegí **Minigolf VR > Crear escena inicial** y **Minigolf VR > Abrir escena inicial**. La versión actual ya permite crear el mapa directamente desde la escena `Untitled` sin modificar.
 
@@ -16,11 +16,11 @@ Si ya tenés un proyecto de Unity abierto en tu computadora, incorporá `Assets`
 
 ### Si en las gafas se ve el mapa pero no podés jugar
 
-1. En la PC, abrí **Meta Horizon Link > Settings > General** y comprobá que **OpenXR Runtime** indique Meta Horizon Link como activo. En Unity, activá **OpenXR** para **Windows, Mac, Linux** y agregá **Oculus Touch Controller Profile** en **Enabled Interaction Profiles**.
-2. Abrí `Assets/Scenes/MinigolfVR.unity` y pulsá el triángulo **Play** en la barra superior de Unity: debe quedar azul. Si dentro de las gafas ves el escritorio y los menús de Unity como una pantalla flotante, estás mirando el escritorio de Link; el juego debe aparecer como escena inmersiva.
+1. En la PC, abrí **Meta Horizon Link > Settings > General** y comprobá que **OpenXR Runtime** indique Meta Horizon Link como activo. Conectá Quest Link y elegí **Minigolf VR > Jugar con Quest Link**. Si el proyecto venía de una descarga anterior, reemplazá `Assets/Editor/MiniGolfVrPcSetup.cs`, `Assets/Scripts/MiniGolfRig.cs` y `Packages/manifest.json` por los de este repositorio o descargá el ZIP actualizado.
+2. El triángulo **Play** de la barra superior de Unity debe transformarse en un cuadrado azul. El texto `Play` del panel Game no inicia el juego. Si el triángulo vuelve a quedar gris, abrí **Window > General > Console** y revisá el primer error rojo. Si dentro de las gafas ves el escritorio y los menús de Unity como una pantalla flotante, estás mirando el escritorio de Link; el juego debe aparecer como escena inmersiva.
 3. Mové la cabeza para comprobar que cambia la vista. Acercá una mano al mango del palo y apretá **grip** (botón lateral). Si la vista sigue fija o no aparecen los controles, revisá la consola de Unity y la conexión de Quest Link antes de intentar golpear la pelota.
 
-Si abriste el proyecto desde un ZIP anterior, podés actualizar solo `Assets/Scripts/MiniGolfRig.cs` desde este repositorio y conservar la escena que Unity ya creó.
+La escena creada dentro de Unity se puede conservar al actualizar los scripts. No borres `Assets/Scenes/MinigolfVR.unity` de tu computadora.
 
 ## Cómo jugar
 
