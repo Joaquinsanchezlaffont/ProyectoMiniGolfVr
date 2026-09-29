@@ -62,10 +62,18 @@ internal static class MiniGolfProjectBuilder
         if (starterRig == null) return;
         EnsureFolders();
         Scene previous = SceneManager.GetActiveScene();
+        bool untitled = string.IsNullOrEmpty(previous.path);
         bool canSwitch = !previous.isDirty &&
-            (string.IsNullOrEmpty(previous.path) || previous.path.EndsWith("/SampleScene.unity"));
-        // Additive creation keeps any scene that the student already has open intact.
-        Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
+            (untitled || previous.path.EndsWith("/SampleScene.unity"));
+        if (untitled && (!canSwitch || SceneManager.sceneCount != 1))
+        {
+            Debug.LogWarning("Guardá la escena Untitled y volvé a Minigolf VR > Crear escena inicial.");
+            return;
+        }
+        // Unity 6.5 cannot open a scene additively while an untitled scene is open.
+        // Replace only the untouched startup scene; preserve all saved scenes.
+        Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,
+            untitled ? NewSceneMode.Single : NewSceneMode.Additive);
         SceneManager.SetActiveScene(scene);
         CreateMaterials();
         CreatePrefabs();
@@ -128,12 +136,15 @@ internal static class MiniGolfProjectBuilder
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene, ScenePath);
         AddToBuildSettings();
-        SceneManager.SetActiveScene(previous);
-        EditorSceneManager.CloseScene(scene, true);
+        if (!untitled)
+        {
+            SceneManager.SetActiveScene(previous);
+            EditorSceneManager.CloseScene(scene, true);
+        }
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        if (canSwitch) EditorSceneManager.OpenScene(ScenePath);
+        if (!untitled && canSwitch) EditorSceneManager.OpenScene(ScenePath);
         SceneView view = SceneView.lastActiveSceneView;
         if (view != null)
         {
