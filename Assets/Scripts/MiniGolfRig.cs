@@ -10,6 +10,7 @@ namespace MiniGolfVR
         [SerializeField] private Transform head;
         [SerializeField] private MiniGolfGame game;
         private Vector3 station;
+        [SerializeField] private float stationBackOffset = 0.58f;
         private bool previousPrimary;
         private bool previousSecondary;
 
@@ -38,11 +39,16 @@ namespace MiniGolfVR
             previousSecondary = secondary;
         }
 
+        public void SetStationOffset(float distance)
+        {
+            stationBackOffset = Mathf.Max(0f, distance);
+        }
+
         public void SetStation(Vector3 tee)
         {
             station = tee;
             // Keep the player inside the starting rail and within reach of the club.
-            transform.position = new Vector3(tee.x, 0f, tee.z - 0.58f);
+            transform.position = new Vector3(tee.x, 0f, tee.z - stationBackOffset);
             if (!VrActive) PlaceDesktopCamera();
         }
 

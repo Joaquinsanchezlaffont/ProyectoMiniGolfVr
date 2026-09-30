@@ -1,0 +1,100 @@
+newmtl M000_Borde_del_hoyo
+Kd 0.055000 0.065000 0.040000
+d 1.000000
+
+newmtl M001_Cesped_cortado_en_franjas
+Kd 0.240000 0.480000 0.140000
+d 1.000000
+
+newmtl M002_Bandera_roja
+Kd 0.830000 0.120000 0.075000
+d 1.000000
+
+newmtl M003_Orilla_del_estanque
+Kd 0.300000 0.430000 0.170000
+d 1.000000
+
+newmtl M004_Rough_recortado
+Kd 0.150000 0.320000 0.100000
+d 1.000000
+
+newmtl M005_Arena
+Kd 0.780000 0.630000 0.340000
+d 1.000000
+
+newmtl M006_Copas
+Kd 0.120000 0.310000 0.100000
+d 1.000000
+
+newmtl M007_Agua_azul
+Kd 0.120000 0.430000 0.580000
+d 1.000000
+
+newmtl M008_Fairway_verde_claro
+Kd 0.310000 0.560000 0.190000
+d 1.000000
+
+newmtl M009_Green
+Kd 0.420000 0.670000 0.250000
+d 1.000000
+
+newmtl M010_Arbustos_verde_claro
+Kd 0.200000 0.400000 0.120000
+d 1.000000
+
+newmtl M011_Hoyo_oscuro
+Kd 0.060000 0.070000 0.045000
+d 1.000000
+
+newmtl M012_Arbustos_verde_oscuro
+Kd 0.090000 0.250000 0.080000
+d 1.000000
+
+newmtl M013_Pelota_marfil
+Kd 0.930000 0.930000 0.860000
+d 1.000000
+
+newmtl M014_Cesped_de_salida
+Kd 0.380000 0.600000 0.220000
+d 1.000000
+
+newmtl M015_Marcas_de_rastrillo
+Kd 0.680000 0.520000 0.280000
+d 1.000000
+
+newmtl M016_Marcador_azul
+Kd 0.040000 0.300000 0.780000
+d 1.000000
+
+newmtl M017_Marcador_dorado
+Kd 0.950000 0.630000 0.060000
+d 1.000000
+
+newmtl M018_Sendero_de_grava_clara
+Kd 0.570000 0.520000 0.370000
+d 1.000000
+
+newmtl M019_Verde_campo
+Kd 0.200000 0.390000 0.120000
+d 1.000000
+
+newmtl M020_Tronco
+Kd 0.270000 0.130000 0.055000
+d 1.000000
+
+newmtl M021_Aros_de_la_empunadura
+Kd 0.240000 0.270000 0.280000
+d 1.000000
+
+newmtl M022_Metal_del_palo
+Kd 0.320000 0.370000 0.400000
+d 1.000000
+
+newmtl M023_Empunadura
+Kd 0.090000 0.100000 0.100000
+d 1.000000
+
+newmtl M024_Ranuras_oscuras_de_la_cara
+Kd 0.100000 0.130000 0.150000
+d 1.000000
+

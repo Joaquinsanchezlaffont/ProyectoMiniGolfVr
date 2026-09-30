@@ -5,10 +5,16 @@ Prototipo de un hoyo para Unity **6000.5.1f1**, la versión instalada en la PC d
 ## Abrir el proyecto
 
 1. Descargá o cloná este repositorio **ProyectoMiniGolfVr**, descomprimilo y abrí la **carpeta raíz** en Unity Hub. Debe contener `Assets`, `Packages` y `ProjectSettings`. Si arriba de Unity dice `MiniGolfVROriginal`, tenés abierto el proyecto anterior: cerralo y abrí esta carpeta desde Unity Hub.
-2. Esperá a que Unity instale los paquetes y compile. Un script de Editor importa automáticamente **Starter Assets** de XR Interaction Toolkit 3.5.1, crea `Assets/Scenes/MinigolfVR.unity` y los prefabs en `Assets/Models`, y prepara los materiales `.mat` ya incluidos en `Assets/Materials`. Unity abre la escena si estabas en una escena nueva o en `SampleScene` sin modificar.
+2. Esperá a que Unity instale los paquetes y compile. Un script de Editor importa automáticamente **Starter Assets** de XR Interaction Toolkit 3.5.1, crea `Assets/Scenes/MinigolfVR.unity` y los prefabs en `Assets/Models`. Después cambia el circuito de prueba por la pista, pelota y palo de `protecto29sep.blend` y crea sus materiales en `Assets/Materials/Blender`. Unity abre la escena si estabas en una escena nueva o en `SampleScene` sin modificar.
 3. Si no se abre, elegí **Minigolf VR > Abrir escena inicial**. Si la escena todavía no existe, elegí **Minigolf VR > Crear escena inicial**. Si Starter Assets solicita importar una muestra, aceptá y esperá a que termine la compilación; luego repetí esa opción del menú.
 4. En Windows, el proyecto prepara automáticamente **OpenXR** para PC, la inicialización XR, el perfil **Oculus Touch** y **Direct3D11**. La PC de prueba sufrió un cierre del Editor al crear las imágenes del visor con Direct3D12. Si Unity avisa que cambió la API gráfica, **cerrá y volvé a abrir el mismo proyecto** antes de tocar Play. En **Meta Horizon Link > Settings > General**, comprobá que **OpenXR Runtime** tenga Meta Horizon Link activo. Conectá las gafas por Quest Link.
 5. En Unity elegí **Minigolf VR > Jugar con Quest Link**. Esta opción abre `MinigolfVR.unity` y activa el Play del Editor. También podés abrir la escena y pulsar el triángulo de la barra superior. Es un proyecto para jugar desde la PC con el visor conectado; no tiene compilación para Android.
+
+### Primer nivel de Blender
+
+El primer y único nivel usa la pista diseñada por Sebastián: salida, fairway, green, bunkers, estanque, bandera y hoyo. La pelota y el palo son los modelos del mismo archivo de Blender. Sus modelos `.obj` exportados están en `Assets/Models/Blender`; Unity puede cargarlos aunque no abras Blender. El original está en `Assets/Models/protecto29sep.blend`.
+
+Si ya tenías `MinigolfVR.unity` creada, abrila sin cambios pendientes de guardar: el Editor reemplaza el hoyo de prueba una sola vez y conserva los turnos y el timer. Si seguís viendo el circuito rectangular, guardá la escena y elegí **Minigolf VR > Usar primer nivel de Blender**. El nuevo nivel aparece en la jerarquía como `HOYO 1 - Blender`.
 
 Si abriste una descarga anterior y la consola dice `Cannot create a new scene additively with an untitled scene unsaved`, guardá la escena vacía con **File > Save As...** como `Assets/Scenes/Borrador.unity`. Después elegí **Minigolf VR > Crear escena inicial** y **Minigolf VR > Abrir escena inicial**. La versión actual ya permite crear el mapa directamente desde la escena `Untitled` sin modificar.
 
@@ -38,8 +44,8 @@ El tutorial muestra la instalación de OpenXR, XR Interaction Toolkit y Starter 
 | Carpeta | Contenido |
 | --- | --- |
 | `Assets/Scripts` | Golpes, física, puntaje, turnos, timer y controles de PC y VR. |
-| `Assets/Models` | Un obstáculo `.obj` editable en Blender. Unity también crea ahí los prefabs de pelota, palo y bandera. |
-| `Assets/Materials` | Archivos `.mat` para pasto verde, bordes azules, obstáculo celeste, pelota blanca, bandera roja e interior del hoyo. |
+| `Assets/Models` | Archivo original `.blend` y, en `Blender/`, pista, pelota, palo y paleta para Unity; los prefabs se crean al abrir el proyecto. |
+| `Assets/Materials` | Materiales `.mat` del juego; al abrirlo se crean los colores del modelo en `Blender/`. |
 | `Assets/Scenes` | Un solo mapa: `MinigolfVR.unity`, creado al abrir el proyecto en Unity. |
 | `Assets/Editor` | Generador de la escena, prefabs y materiales editables. |
 
@@ -47,4 +53,4 @@ El tutorial muestra la instalación de OpenXR, XR Interaction Toolkit y Starter 
 
 Cada jugador hace sus tiros por turno; se suman los golpes. Cuando los demás ya terminaron y empieza el turno del último jugador, tiene **60 segundos**: si no emboca, conserva sus golpes y recibe **5 adicionales**. Tras el único hoyo gana el menor puntaje, o se muestra un empate. La pelota vuelve al punto de salida si cae fuera de la pista.
 
-El modelo y los colores son provisionales. Falta reemplazarlos por el trabajo definitivo de Blender y ajustar la fuerza del golpe mediante pruebas con el visor y los controles físicos. Este entorno no tiene instalado el Editor de Unity ni un visor, así que la escena generada y los golpes VR necesitan esa prueba en tu computadora.
+La pista, la pelota y el palo salen de `protecto29sep.blend`. El montaje de la escena se hace al abrir Unity. Todavía falta ajustar la fuerza del golpe y comprobar el movimiento y el agarre con el visor y los controles reales en tu computadora.
