@@ -47,6 +47,7 @@ internal static class MiniGolfProjectBuilder
     {
         if (File.Exists(ScenePath)) EditorSceneManager.OpenScene(ScenePath);
         else CreateScene();
+        MiniGolfBlenderLevel.InstallIfNeeded();
     }
 
     [MenuItem("Minigolf VR/Abrir escena inicial")]
@@ -54,6 +55,7 @@ internal static class MiniGolfProjectBuilder
     {
         if (!File.Exists(ScenePath)) CreateScene();
         else EditorSceneManager.OpenScene(ScenePath);
+        MiniGolfBlenderLevel.InstallIfNeeded();
     }
 
     private static void CreateScene()
