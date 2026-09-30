@@ -16,7 +16,8 @@ jobs:
         with:
           python-version: '3.11'
       - name: Instalar bpy
-        run: python -m pip install --only-binary=:all: bpy
+        run: |
+          python -m pip install --only-binary=:all: bpy
       - name: Exportar pista, pelota y palo
         run: |
           cat > /tmp/exportar_minigolf.py <<'PY'
