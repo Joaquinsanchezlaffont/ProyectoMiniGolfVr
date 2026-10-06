@@ -67,7 +67,7 @@ internal static class MiniGolfVrPcSetup
             EditorSceneManager.OpenScene(ScenePath);
         }
 
-        MiniGolfBlenderLevel.InstallIfNeeded();
+        MiniGolfProjectBuilder.InstallGrayIfNeeded();
         EditorApplication.isPlaying = true;
     }
 

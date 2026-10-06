@@ -39,7 +39,7 @@ internal static class MiniGolfProjectBuilder
 
         if (!File.Exists(ScenePath)) CreateScene();
         else OpenIfBlank();
-        MiniGolfBlenderLevel.InstallIfNeeded();
+        InstallGrayIfNeeded();
     }
 
     [MenuItem("Minigolf VR/Crear escena inicial")]
@@ -47,7 +47,7 @@ internal static class MiniGolfProjectBuilder
     {
         if (File.Exists(ScenePath)) EditorSceneManager.OpenScene(ScenePath);
         else CreateScene();
-        MiniGolfBlenderLevel.InstallIfNeeded();
+        InstallGrayIfNeeded();
     }
 
     [MenuItem("Minigolf VR/Abrir escena inicial")]
@@ -55,7 +55,7 @@ internal static class MiniGolfProjectBuilder
     {
         if (!File.Exists(ScenePath)) CreateScene();
         else EditorSceneManager.OpenScene(ScenePath);
-        MiniGolfBlenderLevel.InstallIfNeeded();
+        InstallGrayIfNeeded();
     }
 
     private static void CreateScene()
@@ -79,7 +79,7 @@ internal static class MiniGolfProjectBuilder
             untitled ? NewSceneMode.Single : NewSceneMode.Additive);
         SceneManager.SetActiveScene(scene);
         CreateMaterials();
-        CreatePrefabs();
+        CreatePrefabs(true);
 
         GameObject gameObject = new GameObject("PARTIDA - turnos y puntajes");
         MiniGolfGame game = gameObject.AddComponent<MiniGolfGame>();
@@ -203,8 +203,8 @@ internal static class MiniGolfProjectBuilder
 
     private static void CreateMaterials()
     {
-        grass = MakeMaterial("Pasto verde", new Color(0.19f, 0.55f, 0.28f));
-        rails = MakeMaterial("Bordes azul oscuro", new Color(0.09f, 0.19f, 0.38f));
+        grass = MakeMaterial("Pasto verde", new Color(0.46f, 0.48f, 0.50f));
+        rails = MakeMaterial("Bordes azul oscuro", new Color(0.29f, 0.31f, 0.34f));
         obstacles = MakeMaterial("Obstaculos celestes", new Color(0.18f, 0.68f, 0.8f));
         white = MakeMaterial("Pelota y lineas blancas", new Color(0.97f, 0.96f, 0.91f));
         dark = MakeMaterial("Interior del hoyo", new Color(0.025f, 0.04f, 0.055f));
@@ -245,9 +245,17 @@ internal static class MiniGolfProjectBuilder
         return material;
     }
 
-    private static void CreatePrefabs()
+    private static void CreatePrefabs(bool replace = false)
     {
         string ballPath = Models + "Pelota.prefab";
+        string clubPath = Models + "Palo.prefab";
+        string cupPath = Models + "Hoyo y bandera.prefab";
+        if (replace)
+        {
+            AssetDatabase.DeleteAsset(ballPath);
+            AssetDatabase.DeleteAsset(clubPath);
+            AssetDatabase.DeleteAsset(cupPath);
+        }
         if (AssetDatabase.LoadAssetAtPath<GameObject>(ballPath) == null)
         {
             GameObject ball = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -266,7 +274,6 @@ internal static class MiniGolfProjectBuilder
             Object.DestroyImmediate(ball);
         }
 
-        string clubPath = Models + "Palo.prefab";
         if (AssetDatabase.LoadAssetAtPath<GameObject>(clubPath) == null)
         {
             GameObject club = new GameObject("Palo");
@@ -296,31 +303,20 @@ internal static class MiniGolfProjectBuilder
             Object.DestroyImmediate(club);
         }
 
-        string cupPath = Models + "Hoyo y bandera.prefab";
         if (AssetDatabase.LoadAssetAtPath<GameObject>(cupPath) == null)
         {
-            GameObject cup = new GameObject("Hoyo y bandera");
+            GameObject cup = new GameObject("Hoyo");
             SphereCollider trigger = cup.AddComponent<SphereCollider>();
             trigger.radius = 0.19f;
             trigger.isTrigger = true;
-            cup.AddComponent<HoleCup>();
+            cup.AddComponent<HoleCup>().SetCaptureRadius(0.12f);
             GameObject disk = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             disk.name = "Interior oscuro";
             disk.transform.SetParent(cup.transform, false);
-            disk.transform.localPosition = new Vector3(0f, -0.068f, 0f);
+            disk.transform.localPosition = new Vector3(0f, -0.085f, 0f);
             disk.transform.localScale = new Vector3(0.38f, 0.006f, 0.38f);
             disk.GetComponent<Renderer>().sharedMaterial = dark;
             Object.DestroyImmediate(disk.GetComponent<Collider>());
-            GameObject pole = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            pole.name = "Asta";
-            pole.transform.SetParent(cup.transform, false);
-            pole.transform.localPosition = new Vector3(0.22f, 0.48f, 0f);
-            pole.transform.localScale = new Vector3(0.012f, 0.48f, 0.012f);
-            pole.GetComponent<Renderer>().sharedMaterial = white;
-            Object.DestroyImmediate(pole.GetComponent<Collider>());
-            GameObject flag = Box("Bandera", new Vector3(0.36f, 0.83f, 0f),
-                new Vector3(0.27f, 0.16f, 0.02f), red, cup.transform, false);
-            Object.DestroyImmediate(flag.GetComponent<Collider>());
             PrefabUtility.SaveAsPrefabAsset(cup, cupPath);
             Object.DestroyImmediate(cup);
         }
@@ -329,8 +325,8 @@ internal static class MiniGolfProjectBuilder
     private static MiniGolfGame.HoleLayout MakeHole(int index, MiniGolfGame game)
     {
         float x = index * 6f;
-        GameObject root = new GameObject("HOYO " + (index + 1) + " - pista y obstaculos");
-        GameObject floor = Box("Pasto", new Vector3(x, 0f, 0f), new Vector3(2.8f, 0.2f, 7f),
+        GameObject root = new GameObject("HOYO " + (index + 1) + " - pista gris");
+        GameObject floor = Box("Piso gris", new Vector3(x, 0f, 0f), new Vector3(2.8f, 0.2f, 7f),
             grass, root.transform, true);
         floor.AddComponent<TeleportationArea>().interactionLayers =
             new InteractionLayerMask { value = -1 };
@@ -362,27 +358,6 @@ internal static class MiniGolfProjectBuilder
         HoleCup cup = cupObject.GetComponent<HoleCup>();
         cup.Configure(game);
 
-        if (index == 0)
-        {
-            GameObject model = AssetDatabase.LoadAssetAtPath<GameObject>(
-                Models + "ObstaculoTrapezoidal.obj");
-            if (model != null)
-            {
-                GameObject block = (GameObject)PrefabUtility.InstantiatePrefab(model);
-                block.name = "Obstaculo central - modelo OBJ";
-                block.transform.SetParent(root.transform, false);
-                block.transform.position = new Vector3(x, 0.10f, 0f);
-                foreach (Renderer renderer in block.GetComponentsInChildren<Renderer>())
-                    renderer.sharedMaterial = obstacles;
-                BoxCollider collision = block.AddComponent<BoxCollider>();
-                collision.center = new Vector3(0f, 0.21f, 0f);
-                collision.size = new Vector3(0.60f, 0.42f, 0.60f);
-                collision.material = rolling;
-            }
-            else
-                Box("Obstaculo central", new Vector3(x, 0.27f, 0f),
-                    new Vector3(0.48f, 0.35f, 0.48f), obstacles, root.transform, true);
-        }
         return new MiniGolfGame.HoleLayout
         {
             name = "Hoyo " + (index + 1),
@@ -390,6 +365,67 @@ internal static class MiniGolfProjectBuilder
             tee = tee.transform,
             cup = cup
         };
+    }
+
+    [MenuItem("Minigolf VR/Dejar pista gris")]
+    private static void GrayFromMenu()
+    {
+        if (!File.Exists(ScenePath)) CreateScene();
+        if (!File.Exists(ScenePath)) return;
+        if (SceneManager.GetActiveScene().path != ScenePath)
+        {
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            EditorSceneManager.OpenScene(ScenePath);
+        }
+        InstallGrayIfNeeded();
+    }
+
+    internal static void InstallGrayIfNeeded()
+    {
+        if (EditorApplication.isPlayingOrWillChangePlaymode ||
+            EditorApplication.isCompiling || EditorApplication.isUpdating ||
+            SceneManager.GetActiveScene().path != ScenePath)
+            return;
+
+        if (GameObject.Find("HOYO 1 - pista gris") != null) return;
+        GameObject oldHole = GameObject.Find("HOYO 1 - Blender") ??
+            GameObject.Find("HOYO 1 - pista y obstaculos");
+        GameObject matchObject = GameObject.Find("PARTIDA - turnos y puntajes");
+        GameObject playerObject = GameObject.Find("Jugador - XR Origin (VR) - Starter Assets");
+        GameObject scoreObject = GameObject.Find("Puntaje VR");
+        if (oldHole == null || matchObject == null || playerObject == null || scoreObject == null)
+            return;
+        MiniGolfGame match = matchObject.GetComponent<MiniGolfGame>();
+        MiniGolfRig rig = playerObject.GetComponent<MiniGolfRig>();
+        TextMesh score = scoreObject.GetComponent<TextMesh>();
+        if (match == null || rig == null || score == null) return;
+
+        CreateMaterials();
+        GameObject oldBall = GameObject.Find("Pelota - fisica");
+        GameObject oldClub = GameObject.Find("Palo - agarrar con grip VR");
+        if (oldBall != null) Object.DestroyImmediate(oldBall);
+        if (oldClub != null) Object.DestroyImmediate(oldClub);
+        Object.DestroyImmediate(oldHole);
+        CreatePrefabs(true);
+
+        MiniGolfGame.HoleLayout hole = MakeHole(0, match);
+        GameObject ball = (GameObject)PrefabUtility.InstantiatePrefab(
+            AssetDatabase.LoadAssetAtPath<GameObject>(Models + "Pelota.prefab"));
+        ball.name = "Pelota - fisica";
+        GameObject club = (GameObject)PrefabUtility.InstantiatePrefab(
+            AssetDatabase.LoadAssetAtPath<GameObject>(Models + "Palo.prefab"));
+        club.name = "Palo - agarrar con grip VR";
+        club.transform.position = new Vector3(0.55f, 0.95f, -2.7f);
+        Transform head = club.transform.Find("Cabeza del palo");
+        club.GetComponent<GolfClub>().Configure(match, head, head.GetComponent<BoxCollider>());
+
+        rig.SetStationOffset(0.58f);
+        match.Configure(new[] { hole }, ball.GetComponent<GolfBall>(), rig, score);
+        rig.SetStation(hole.tee.position);
+        EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+        EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
+        AssetDatabase.SaveAssets();
+        Debug.Log("Minigolf VR: pista gris con un hoyo, pelota y palo VR lista.");
     }
 
     private static GameObject Box(string name, Vector3 position, Vector3 size,
