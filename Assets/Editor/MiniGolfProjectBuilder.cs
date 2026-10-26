@@ -4,10 +4,12 @@ using UnityEditor;
 using UnityEditor.PackageManager.UI;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Locomotion.Teleportation;
+using Unity.XR.CoreUtils;
 
 // On the first import, builds editable .unity, .prefab and .mat assets INSIDE Assets.
 // The source project remains small, while the scene is immediately visible in Unity.
@@ -17,14 +19,13 @@ internal static class MiniGolfProjectBuilder
     private const string ScenePath = "Assets/Scenes/MinigolfVR.unity";
     private const string Materials = "Assets/Materials/";
     private const string Models = "Assets/Models/";
+    private const string HandPrefabs = Models + "Animated Hands/Prefabs/";
     private const string XriVersion = "3.5.1";
 
     private static Material grass;
     private static Material rails;
-    private static Material obstacles;
     private static Material white;
     private static Material dark;
-    private static Material red;
     private static PhysicsMaterial rolling;
 
     static MiniGolfProjectBuilder() => EditorApplication.delayCall += BuildOnFirstImport;
@@ -39,7 +40,7 @@ internal static class MiniGolfProjectBuilder
 
         if (!File.Exists(ScenePath)) CreateScene();
         else OpenIfBlank();
-        InstallGrayIfNeeded();
+        InstallSimpleSceneIfNeeded();
     }
 
     [MenuItem("Minigolf VR/Crear escena inicial")]
@@ -47,7 +48,7 @@ internal static class MiniGolfProjectBuilder
     {
         if (File.Exists(ScenePath)) EditorSceneManager.OpenScene(ScenePath);
         else CreateScene();
-        InstallGrayIfNeeded();
+        InstallSimpleSceneIfNeeded();
     }
 
     [MenuItem("Minigolf VR/Abrir escena inicial")]
@@ -55,7 +56,7 @@ internal static class MiniGolfProjectBuilder
     {
         if (!File.Exists(ScenePath)) CreateScene();
         else EditorSceneManager.OpenScene(ScenePath);
-        InstallGrayIfNeeded();
+        InstallSimpleSceneIfNeeded();
     }
 
     private static void CreateScene()
@@ -81,11 +82,11 @@ internal static class MiniGolfProjectBuilder
         CreateMaterials();
         CreatePrefabs(true);
 
-        GameObject gameObject = new GameObject("PARTIDA - turnos y puntajes");
+        GameObject gameObject = new GameObject("Prueba - un hoyo");
         MiniGolfGame game = gameObject.AddComponent<MiniGolfGame>();
-        MiniGolfGame.HoleLayout[] holes = new MiniGolfGame.HoleLayout[1];
-        for (int i = 0; i < holes.Length; i++)
-            holes[i] = MakeHole(i, game);
+        HoleCup cup;
+        Transform tee;
+        MakeHole(game, out tee, out cup);
 
         GameObject ball = (GameObject)PrefabUtility.InstantiatePrefab(
             AssetDatabase.LoadAssetAtPath<GameObject>(Models + "Pelota.prefab"));
@@ -98,7 +99,8 @@ internal static class MiniGolfProjectBuilder
         if (camera == null) throw new System.InvalidOperationException("Starter Assets: falta la cámara del XR Origin.");
         GameObject cameraObject = camera.gameObject;
         camera.nearClipPlane = 0.02f;
-        rig.Configure(cameraObject.transform, game);
+        rig.Configure(cameraObject.transform);
+        AddHandVisuals(rigObject.transform);
         new GameObject("XR Interaction Manager").AddComponent<XRInteractionManager>();
 
         GameObject club = (GameObject)PrefabUtility.InstantiatePrefab(
@@ -109,25 +111,8 @@ internal static class MiniGolfProjectBuilder
         club.GetComponent<GolfClub>().Configure(game, clubHead,
             clubHead.GetComponent<BoxCollider>());
 
-        GameObject display = new GameObject("Puntaje VR");
-        display.transform.SetParent(cameraObject.transform, false);
-        display.transform.localPosition = new Vector3(-0.55f, -0.20f, 1.4f);
-        TextMesh scoreboard = display.AddComponent<TextMesh>();
-        scoreboard.text = "MINIGOLF VR";
-        scoreboard.fontSize = 40;
-        scoreboard.characterSize = 0.0018f;
-        scoreboard.anchor = TextAnchor.UpperLeft;
-        scoreboard.color = Color.white;
-
-        GameObject arrow = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        arrow.name = "Direccion del golpe (PC)";
-        Object.DestroyImmediate(arrow.GetComponent<Collider>());
-        arrow.GetComponent<Renderer>().sharedMaterial = red;
-        DesktopGolfInput input = gameObject.AddComponent<DesktopGolfInput>();
-        input.Configure(game, arrow.transform);
-
-        game.Configure(holes, ball.GetComponent<GolfBall>(), rig, scoreboard);
-        rig.SetStation(holes[0].tee.position);
+        game.Configure(tee, cup, ball.GetComponent<GolfBall>());
+        rig.SetStation(tee.position);
 
         GameObject lightObject = new GameObject("Sol");
         Light sunlight = lightObject.AddComponent<Light>();
@@ -203,12 +188,20 @@ internal static class MiniGolfProjectBuilder
 
     private static void CreateMaterials()
     {
-        grass = MakeMaterial("Pasto verde", new Color(0.46f, 0.48f, 0.50f));
-        rails = MakeMaterial("Bordes azul oscuro", new Color(0.29f, 0.31f, 0.34f));
-        obstacles = MakeMaterial("Obstaculos celestes", new Color(0.18f, 0.68f, 0.8f));
+        grass = MakeMaterial("Piso gris", new Color(0.48f, 0.50f, 0.52f));
+        rails = MakeMaterial("Bordes grises", new Color(0.30f, 0.32f, 0.34f));
         white = MakeMaterial("Pelota y lineas blancas", new Color(0.97f, 0.96f, 0.91f));
         dark = MakeMaterial("Interior del hoyo", new Color(0.025f, 0.04f, 0.055f));
-        red = MakeMaterial("Bandera roja", new Color(0.91f, 0.18f, 0.14f));
+        // The video package ships a blue URP material. Use the current project's
+        // shader so its real hand meshes also render in a Built-in project.
+        Material handMaterial = AssetDatabase.LoadAssetAtPath<Material>(
+            Materials + "Animated Hands/Hands_solid.mat");
+        Shader handShader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+        if (handMaterial != null && handShader != null && handMaterial.shader != handShader)
+        {
+            handMaterial.shader = handShader;
+            EditorUtility.SetDirty(handMaterial);
+        }
         rolling = AssetDatabase.LoadAssetAtPath<PhysicsMaterial>(Materials + "Rodamiento.physicMaterial");
         if (rolling == null)
         {
@@ -249,7 +242,7 @@ internal static class MiniGolfProjectBuilder
     {
         string ballPath = Models + "Pelota.prefab";
         string clubPath = Models + "Palo.prefab";
-        string cupPath = Models + "Hoyo y bandera.prefab";
+        string cupPath = Models + "Hoyo.prefab";
         if (replace)
         {
             AssetDatabase.DeleteAsset(ballPath);
@@ -309,7 +302,7 @@ internal static class MiniGolfProjectBuilder
             SphereCollider trigger = cup.AddComponent<SphereCollider>();
             trigger.radius = 0.19f;
             trigger.isTrigger = true;
-            cup.AddComponent<HoleCup>().SetCaptureRadius(0.12f);
+            cup.AddComponent<HoleCup>();
             GameObject disk = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             disk.name = "Interior oscuro";
             disk.transform.SetParent(cup.transform, false);
@@ -322,53 +315,138 @@ internal static class MiniGolfProjectBuilder
         }
     }
 
-    private static MiniGolfGame.HoleLayout MakeHole(int index, MiniGolfGame game)
+    private static void MakeHole(MiniGolfGame game, out Transform tee, out HoleCup cup)
     {
-        float x = index * 6f;
-        GameObject root = new GameObject("HOYO " + (index + 1) + " - pista gris");
-        GameObject floor = Box("Piso gris", new Vector3(x, 0f, 0f), new Vector3(2.8f, 0.2f, 7f),
-            grass, root.transform, true);
+        GameObject root = new GameObject("HOYO 1 - pista gris");
+        GameObject floor = Box("Piso gris", new Vector3(0f, 0f, 0f),
+            new Vector3(2.8f, 0.2f, 7f), grass, root.transform, true);
         floor.AddComponent<TeleportationArea>().interactionLayers =
             new InteractionLayerMask { value = -1 };
-        Box("Borde izquierdo", new Vector3(x - 1.4f, 0.24f, 0f),
+        Box("Borde izquierdo", new Vector3(-1.4f, 0.24f, 0f),
             new Vector3(0.18f, 0.36f, 7.2f), rails, root.transform, true);
-        Box("Borde derecho", new Vector3(x + 1.4f, 0.24f, 0f),
+        Box("Borde derecho", new Vector3(1.4f, 0.24f, 0f),
             new Vector3(0.18f, 0.36f, 7.2f), rails, root.transform, true);
-        Box("Borde inicial", new Vector3(x, 0.24f, -3.5f),
+        Box("Borde inicial", new Vector3(0f, 0.24f, -3.5f),
             new Vector3(2.8f, 0.36f, 0.18f), rails, root.transform, true);
-        Box("Borde final", new Vector3(x, 0.24f, 3.5f),
+        Box("Borde final", new Vector3(0f, 0.24f, 3.5f),
             new Vector3(2.8f, 0.36f, 0.18f), rails, root.transform, true);
 
-        GameObject tee = new GameObject("Salida de la pelota");
-        tee.transform.SetParent(root.transform, false);
-        tee.transform.position = new Vector3(x, 0.2f, -2.65f);
-        GameObject mark = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        mark.name = "Marca de salida";
-        mark.transform.SetParent(root.transform, false);
-        mark.transform.position = new Vector3(x, 0.105f, -2.65f);
-        mark.transform.localScale = new Vector3(0.24f, 0.003f, 0.24f);
-        mark.GetComponent<Renderer>().sharedMaterial = white;
-        Object.DestroyImmediate(mark.GetComponent<Collider>());
+        GameObject teeObject = new GameObject("Salida de la pelota");
+        teeObject.transform.SetParent(root.transform, false);
+        teeObject.transform.position = new Vector3(0f, 0.2f, -2.65f);
+        tee = teeObject.transform;
 
         GameObject cupObject = (GameObject)PrefabUtility.InstantiatePrefab(
-            AssetDatabase.LoadAssetAtPath<GameObject>(Models + "Hoyo y bandera.prefab"));
-        cupObject.name = "Meta - hoyo " + (index + 1);
+            AssetDatabase.LoadAssetAtPath<GameObject>(Models + "Hoyo.prefab"));
+        cupObject.name = "Hoyo";
         cupObject.transform.SetParent(root.transform, false);
-        cupObject.transform.position = new Vector3(x, 0.19f, 2.75f);
-        HoleCup cup = cupObject.GetComponent<HoleCup>();
+        cupObject.transform.position = new Vector3(0f, 0.19f, 2.75f);
+        cup = cupObject.GetComponent<HoleCup>();
         cup.Configure(game);
-
-        return new MiniGolfGame.HoleLayout
-        {
-            name = "Hoyo " + (index + 1),
-            root = root,
-            tee = tee.transform,
-            cup = cup
-        };
     }
 
-    [MenuItem("Minigolf VR/Dejar pista gris")]
-    private static void GrayFromMenu()
+    private static void AddHandVisuals(Transform rig)
+    {
+        InputActionAsset actions = FindStarterActions();
+        if (actions == null)
+            throw new System.InvalidOperationException(
+                "Falta XRI Default Input Actions. Importá XR Interaction Toolkit > Samples > Starter Assets.");
+
+        foreach (bool left in new[] { true, false })
+        {
+            string name = left ? "Left Controller" : "Right Controller";
+            Transform controller = null;
+            foreach (Transform candidate in rig.GetComponentsInChildren<Transform>(true))
+                if (candidate.name == name) { controller = candidate; break; }
+            if (controller == null)
+                throw new System.InvalidOperationException("Starter Assets: falta " + name +
+                    ". Revisá que se importó XR Origin (XR Rig) del paquete XRI 3.5.1.");
+
+            string visualName = left ? "Mano izquierda" : "Mano derecha";
+            Transform existing = controller.Find(visualName);
+            if (existing != null) Object.DestroyImmediate(existing.gameObject);
+
+            // Keep teleport rays and interactors, but hide the generic controller model.
+            foreach (MeshRenderer mesh in controller.GetComponentsInChildren<MeshRenderer>(true))
+                mesh.enabled = false;
+            foreach (SkinnedMeshRenderer mesh in controller.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+                mesh.enabled = false;
+
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+                HandPrefabs + (left ? "Left Hand Model.prefab" : "Right Hand Model.prefab"));
+            if (prefab == null)
+                throw new System.InvalidOperationException(
+                    "Faltan los prefabs Animated Hands del enlace original de Valem.");
+            GameObject visual = (GameObject)PrefabUtility.InstantiatePrefab(prefab, controller);
+            visual.name = visualName;
+            visual.transform.localPosition = Vector3.zero;
+            visual.transform.localRotation = Quaternion.identity;
+            visual.transform.localScale = Vector3.one;
+
+            InputActionReference trigger = GetOrCreateReference(actions,
+                FindInteractionAction(actions, left, "Activate Value"));
+            InputActionReference grip = GetOrCreateReference(actions,
+                FindInteractionAction(actions, left, "Select Value"));
+            Animator animator = visual.GetComponent<Animator>();
+            if (animator == null || animator.runtimeAnimatorController == null)
+                throw new System.InvalidOperationException(
+                    "El modelo de mano no trae el Animator Grip/Trigger del tutorial.");
+            AnimateHandOnInput animation = visual.AddComponent<AnimateHandOnInput>();
+            animation.Configure(trigger, grip, animator,
+                left ? UnityEngine.XR.XRNode.LeftHand : UnityEngine.XR.XRNode.RightHand);
+        }
+    }
+
+    private static InputActionAsset FindStarterActions()
+    {
+        string sample = "Assets/Samples/XR Interaction Toolkit/" + XriVersion + "/Starter Assets";
+        foreach (string guid in AssetDatabase.FindAssets("t:InputActionAsset", new[] { sample }))
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            if (Path.GetFileNameWithoutExtension(path) == "XRI Default Input Actions")
+                return AssetDatabase.LoadAssetAtPath<InputActionAsset>(path);
+        }
+        return null;
+    }
+
+    private static InputAction FindInteractionAction(InputActionAsset asset, bool left, string actionName)
+    {
+        string side = left ? "Left" : "Right";
+        foreach (InputActionMap map in asset.actionMaps)
+        {
+            if (map.name.IndexOf(side, System.StringComparison.OrdinalIgnoreCase) < 0 ||
+                map.name.IndexOf("Interaction", System.StringComparison.OrdinalIgnoreCase) < 0)
+                continue;
+            InputAction action = map.FindAction(actionName, false);
+            if (action != null) return action;
+        }
+        throw new System.InvalidOperationException("Starter Assets: falta XRI " + side +
+            " Interaction / " + actionName + ".");
+    }
+
+    private static InputActionReference GetOrCreateReference(InputActionAsset asset, InputAction action)
+    {
+        string source = AssetDatabase.GetAssetPath(asset);
+        foreach (Object subasset in AssetDatabase.LoadAllAssetsAtPath(source))
+            if (subasset is InputActionReference reference && reference.action != null &&
+                reference.action.id == action.id)
+                return reference;
+
+        // Some importer versions do not expose the action references as subassets.
+        // Save our own persistent reference so the .unity scene can serialize it.
+        string folder = Models + "Animated Hands/Action References";
+        if (!AssetDatabase.IsValidFolder(folder))
+            AssetDatabase.CreateFolder(Models + "Animated Hands", "Action References");
+        string path = folder + "/" + action.actionMap.name + " - " + action.name + ".asset";
+        InputActionReference saved = AssetDatabase.LoadAssetAtPath<InputActionReference>(path);
+        if (saved != null) return saved;
+        saved = InputActionReference.Create(action);
+        AssetDatabase.CreateAsset(saved, path);
+        return saved;
+    }
+
+    [MenuItem("Minigolf VR/Dejar solo pista y manos")]
+    private static void SimpleFromMenu()
     {
         if (!File.Exists(ScenePath)) CreateScene();
         if (!File.Exists(ScenePath)) return;
@@ -377,38 +455,49 @@ internal static class MiniGolfProjectBuilder
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
             EditorSceneManager.OpenScene(ScenePath);
         }
-        InstallGrayIfNeeded();
+        InstallSimpleSceneIfNeeded();
     }
 
-    internal static void InstallGrayIfNeeded()
+    internal static void InstallSimpleSceneIfNeeded()
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode ||
             EditorApplication.isCompiling || EditorApplication.isUpdating ||
-            SceneManager.GetActiveScene().path != ScenePath)
-            return;
+            SceneManager.GetActiveScene().path != ScenePath) return;
 
-        if (GameObject.Find("HOYO 1 - pista gris") != null) return;
-        GameObject oldHole = GameObject.Find("HOYO 1 - Blender") ??
-            GameObject.Find("HOYO 1 - pista y obstaculos");
-        GameObject matchObject = GameObject.Find("PARTIDA - turnos y puntajes");
-        GameObject playerObject = GameObject.Find("Jugador - XR Origin (VR) - Starter Assets");
-        GameObject scoreObject = GameObject.Find("Puntaje VR");
-        if (oldHole == null || matchObject == null || playerObject == null || scoreObject == null)
+        GameObject oldHole = GameObject.Find("HOYO 1 - pista y obstaculos") ??
+            GameObject.Find("HOYO 1 - Blender") ??
+            GameObject.Find("HOYO 1 - pista gris");
+        GameObject rigObject = GameObject.Find("Jugador - XR Origin (VR) - Starter Assets");
+        if (rigObject == null) return;
+        if (GameObject.Find("HOYO 1 - pista gris") != null &&
+            rigObject.GetComponentsInChildren<AnimateHandOnInput>(true).Length == 2)
+        {
+            FixVrHeightIfNeeded();
             return;
-        MiniGolfGame match = matchObject.GetComponent<MiniGolfGame>();
-        MiniGolfRig rig = playerObject.GetComponent<MiniGolfRig>();
-        TextMesh score = scoreObject.GetComponent<TextMesh>();
-        if (match == null || rig == null || score == null) return;
-
+        }
+        MiniGolfRig rig = rigObject.GetComponent<MiniGolfRig>();
+        GameObject gameObject = GameObject.Find("PARTIDA - turnos y puntajes") ??
+            GameObject.Find("Prueba - un hoyo");
+        MiniGolfGame game = gameObject?.GetComponent<MiniGolfGame>();
+        if (game == null || rig == null || oldHole == null) return;
         CreateMaterials();
-        GameObject oldBall = GameObject.Find("Pelota - fisica");
-        GameObject oldClub = GameObject.Find("Palo - agarrar con grip VR");
-        if (oldBall != null) Object.DestroyImmediate(oldBall);
-        if (oldClub != null) Object.DestroyImmediate(oldClub);
+        // Remove the old ball and club before recreating their prefabs.
+        foreach (GolfBall oldBall in Object.FindObjectsByType<GolfBall>(FindObjectsSortMode.None))
+            Object.DestroyImmediate(oldBall.gameObject);
+        foreach (GolfClub oldClub in Object.FindObjectsByType<GolfClub>(FindObjectsSortMode.None))
+            Object.DestroyImmediate(oldClub.gameObject);
         Object.DestroyImmediate(oldHole);
+        GameObject oldArrow = GameObject.Find("Direccion del golpe (PC)");
+        if (oldArrow != null) Object.DestroyImmediate(oldArrow);
+        GameObject score = GameObject.Find("Puntaje VR");
+        if (score != null) Object.DestroyImmediate(score);
+        DesktopGolfInput desktop = game.GetComponent<DesktopGolfInput>();
+        if (desktop != null) Object.DestroyImmediate(desktop);
+        game.name = "Prueba - un hoyo";
         CreatePrefabs(true);
-
-        MiniGolfGame.HoleLayout hole = MakeHole(0, match);
+        Transform tee;
+        HoleCup cup;
+        MakeHole(game, out tee, out cup);
         GameObject ball = (GameObject)PrefabUtility.InstantiatePrefab(
             AssetDatabase.LoadAssetAtPath<GameObject>(Models + "Pelota.prefab"));
         ball.name = "Pelota - fisica";
@@ -417,15 +506,43 @@ internal static class MiniGolfProjectBuilder
         club.name = "Palo - agarrar con grip VR";
         club.transform.position = new Vector3(0.55f, 0.95f, -2.7f);
         Transform head = club.transform.Find("Cabeza del palo");
-        club.GetComponent<GolfClub>().Configure(match, head, head.GetComponent<BoxCollider>());
-
-        rig.SetStationOffset(0.58f);
-        match.Configure(new[] { hole }, ball.GetComponent<GolfBall>(), rig, score);
-        rig.SetStation(hole.tee.position);
-        EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+        club.GetComponent<GolfClub>().Configure(game, head, head.GetComponent<BoxCollider>());
+        AddHandVisuals(rigObject.transform);
+        game.Configure(tee, cup, ball.GetComponent<GolfBall>());
+        rig.Configure(rigObject.GetComponentInChildren<Camera>(true).transform);
+        rig.SetStation(tee.position);
         EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
         AssetDatabase.SaveAssets();
-        Debug.Log("Minigolf VR: pista gris con un hoyo, pelota y palo VR lista.");
+        Debug.Log("Minigolf VR: pista gris, hoyo, pelota, palo y manos VR listos.");
+    }
+
+    [MenuItem("Minigolf VR/Corregir altura VR")]
+    private static void FixHeightFromMenu()
+    {
+        if (SceneManager.GetActiveScene().path != ScenePath)
+            EditorSceneManager.OpenScene(ScenePath);
+        FixVrHeightIfNeeded();
+    }
+
+    internal static void FixVrHeightIfNeeded()
+    {
+        GameObject rigObject = GameObject.Find("Jugador - XR Origin (VR) - Starter Assets");
+        if (rigObject == null) return;
+        XROrigin origin = rigObject.GetComponent<XROrigin>();
+        Camera camera = rigObject.GetComponentInChildren<Camera>(true);
+        MiniGolfRig rig = rigObject.GetComponent<MiniGolfRig>();
+        if (origin == null || camera == null || rig == null) return;
+        if (origin.RequestedTrackingOriginMode == XROrigin.TrackingOriginMode.Floor &&
+            camera.transform.localPosition == Vector3.zero &&
+            Mathf.Abs(rigObject.transform.position.y) < 0.001f) return;
+
+        rig.Configure(camera.transform);
+        Vector3 position = rigObject.transform.position;
+        position.y = 0f;
+        rigObject.transform.position = position;
+        EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+        EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
+        Debug.Log("Minigolf VR: altura corregida. El XR Origin toma como referencia el piso.");
     }
 
     private static GameObject Box(string name, Vector3 position, Vector3 size,
