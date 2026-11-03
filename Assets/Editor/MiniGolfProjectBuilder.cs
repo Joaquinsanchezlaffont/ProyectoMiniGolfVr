@@ -42,6 +42,7 @@ internal static class MiniGolfProjectBuilder
         else OpenIfBlank();
         InstallSimpleSceneIfNeeded();
         MiniGolfStartMenuBuilder.EnsureCreated();
+        MiniGolfMainMenuBuilder.EnsureCreated();
     }
 
     [MenuItem("Minigolf VR/Crear escena inicial")]
