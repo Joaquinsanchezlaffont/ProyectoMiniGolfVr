@@ -1,4 +1,3 @@
-using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEditor.XR.Management;
@@ -15,7 +14,6 @@ using UnityEngine.XR.OpenXR.Features.Interactions;
 [InitializeOnLoad]
 internal static class MiniGolfVrPcSetup
 {
-    private const string ScenePath = "Assets/Scenes/MinigolfVR.unity";
     private const string LoaderName = "UnityEngine.XR.OpenXR.OpenXRLoader";
     private const BuildTargetGroup Target = BuildTargetGroup.Standalone;
 
@@ -55,19 +53,18 @@ internal static class MiniGolfVrPcSetup
                 "Entendido");
             return;
         }
-        if (!File.Exists(ScenePath))
+        if (!MiniGolfStartMenuBuilder.EnsureCreated())
         {
-            Debug.LogError("Minigolf VR: falta la escena. Elegí Minigolf VR > Crear escena inicial.");
+            Debug.LogError("Minigolf VR: falta la pantalla de inicio. Esperá a que se importen Starter Assets y elegí Minigolf VR > Abrir pantalla de inicio.");
             return;
         }
 
-        if (SceneManager.GetActiveScene().path != ScenePath)
+        if (SceneManager.GetActiveScene().path != MiniGolfStartMenuBuilder.ScenePath)
         {
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
-            EditorSceneManager.OpenScene(ScenePath);
+            EditorSceneManager.OpenScene(MiniGolfStartMenuBuilder.ScenePath);
         }
 
-        MiniGolfProjectBuilder.InstallSimpleSceneIfNeeded();
         EditorApplication.isPlaying = true;
     }
 
