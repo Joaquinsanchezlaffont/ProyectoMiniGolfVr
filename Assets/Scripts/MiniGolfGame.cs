@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace MiniGolfVR
 {
-    // A single practice hole. The ball respawns after scoring or falling off the plane.
+    // Prueba de un hoyo: la pelota vuelve al inicio después de entrar o caerse.
     public sealed class MiniGolfGame : MonoBehaviour
     {
         [SerializeField] private Transform tee;
@@ -10,15 +10,6 @@ namespace MiniGolfVR
         [SerializeField] private GolfBall ball;
         private float lastStrikeAt = -100f;
         private float respawnAt = -1f;
-
-        public GolfBall Ball => ball;
-
-        public void Configure(Transform start, HoleCup target, GolfBall golfBall)
-        {
-            tee = start;
-            cup = target;
-            ball = golfBall;
-        }
 
         private void Start() => ResetBall();
 

@@ -7,8 +7,6 @@ namespace MiniGolfVR
     {
         [SerializeField] private MiniGolfGame game;
 
-        public void Configure(MiniGolfGame owner) => game = owner;
-
         private void OnTriggerEnter(Collider other) => TryCapture(other);
         private void OnTriggerStay(Collider other) => TryCapture(other);
 

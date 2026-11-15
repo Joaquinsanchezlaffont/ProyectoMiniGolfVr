@@ -3,7 +3,7 @@ using UnityEngine.SceneManagement;
 
 namespace MiniGolfVR
 {
-    // Assigned to the persistent On Click event of the JUGAR button.
+    // Botón de la pantalla de inicio.
     public sealed class InicioMenuController : MonoBehaviour
     {
         private const string MainMenuScene = "MenuPrincipal";

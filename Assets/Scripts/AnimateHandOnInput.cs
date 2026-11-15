@@ -4,8 +4,7 @@ using UnityEngine.XR;
 
 namespace MiniGolfVR
 {
-    // Valem's hand prefab has a 2D blend tree with Grip and Trigger parameters.
-    // Read the same XRI Starter Assets actions used by the controller interactors.
+    // Las animaciones de las manos usan el grip y el gatillo de los controles.
     public sealed class AnimateHandOnInput : MonoBehaviour
     {
         [SerializeField] private InputActionProperty triggerValue;
@@ -16,15 +15,6 @@ namespace MiniGolfVR
         private static readonly int Grip = Animator.StringToHash("Grip");
         private static readonly int Trigger = Animator.StringToHash("Trigger");
         private Renderer[] parts;
-
-        public void Configure(InputActionReference trigger, InputActionReference grip,
-            Animator animator, XRNode node)
-        {
-            triggerValue = new InputActionProperty(trigger);
-            gripValue = new InputActionProperty(grip);
-            handAnimator = animator;
-            controller = node;
-        }
 
         private void Awake() => parts = GetComponentsInChildren<Renderer>(true);
 

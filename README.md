@@ -4,12 +4,13 @@ Proyecto de Joaquín Sánchez Laffont (Unity) y Sebastián Ángel Warman (Blende
 
 ## Cómo abrirlo
 
-1. Abrí la carpeta del repositorio desde Unity Hub con Unity **6000.5.1f1**.
-2. Esperá a que Unity importe los paquetes y Starter Assets. La primera vez puede tardar.
-3. Abrí `Assets/Scenes/Inicio.unity` y tocá **Play**.
-4. **JUGAR** abre el menú. **JUGAR SOLO** abre la pista y **VOLVER** regresa al inicio.
+1. Si tenés un ZIP viejo, cerrá Unity y descargá la versión nueva del repositorio. No copies solamente `Assets`: también hacen falta `Packages` y `ProjectSettings`.
+2. En Unity Hub abrí la carpeta que contiene esas tres carpetas, con Unity **6000.5.1f1**.
+3. Esperá a que Unity importe los paquetes y Starter Assets. La primera vez puede tardar.
+4. Abrí `Assets/Scenes/Inicio.unity` y tocá **Play**.
+5. **JUGAR** abre el menú. **JUGAR SOLO** abre la pista y **VOLVER** regresa al inicio.
 
-Para usar Quest Link en Windows, conectá el visor, abrí Meta Horizon Link y elegilo como runtime OpenXR antes de tocar Play. En VR, apuntá al botón y apretá el gatillo. En la pista, acercá la mano al palo y apretá el grip para agarrarlo.
+Para usar Quest Link en Windows, conectá el visor y activá Meta Horizon Link como runtime OpenXR en la app de la PC. Después reiniciá Unity. En VR, apuntá al botón y apretá el gatillo. En la pista, acercá la mano al palo y apretá el grip para agarrarlo.
 
 ## Escenas y archivos
 

@@ -16,15 +16,6 @@ namespace MiniGolfVR
         private bool wasHeld;
         private float nextHitAt;
 
-        public void Configure(MiniGolfGame owner, Transform clubHead, Collider trigger)
-        {
-            game = owner;
-            head = clubHead;
-            strikingCollider = trigger;
-            grab = GetComponent<XRGrabInteractable>();
-            strikingCollider.enabled = false;
-        }
-
         private void Awake()
         {
             if (grab == null) grab = GetComponent<XRGrabInteractable>();
