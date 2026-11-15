@@ -1,32 +1,25 @@
-# Minigolf VR: inicio y prueba de un hoyo
+# MiniGolf VR
 
-Proyecto para **Unity 6000.5.1f1**, PC con **Meta Horizon Link / Quest Link** y gafas Quest. Al comenzar aparece la imagen `Inicio.png` con un botón **JUGAR** debajo. Al pulsarlo se abre `MenuPrincipal`, hecho con la imagen `Menu.png` y tres botones: **JUGAR SOLO**, **JUGAR CON AMIGOS** y **VOLVER**. El menú oculta sus modelos de manos para que no tapen los botones; los controles VR siguen funcionando. **JUGAR SOLO** abre el hoyo de prueba, **VOLVER** regresa al inicio y **JUGAR CON AMIGOS** queda visible para conectar el modo multijugador más adelante.
+Proyecto de Joaquín Sánchez Laffont (Unity) y Sebastián Ángel Warman (Blender).
 
-La escena de prueba sigue teniendo una sola pista rectangular gris con cuatro bordes, pelota, palo agarrable y un hoyo. Las dos manos azules animadas son los prefabs **Left Hand Model** y **Right Hand Model** del [paquete original de Valem](https://drive.google.com/file/d/1cZn67HwxYs0z_pur8vamxQaK_BRtJp7h/view). Al embocar, la pelota vuelve a la salida después de un segundo.
+## Cómo abrirlo
 
-El proyecto usa los pasos de VR que aparecen en la transcripción del [tutorial de Valem](https://youtu.be/H8dWVlZKQu4): OpenXR para PC, XR Interaction Toolkit, Starter Assets, XR Origin en modo Floor, controladores rastreados, prefabs de manos azules animadas con `Grip`/`Trigger`, locomoción y un XR Grab Interactable en el palo. El script `AnimateHandOnInput` lee las acciones **XRI Left/Right Interaction / Select Value** (grip) y **Activate Value** (gatillo), tal como muestra el video. La muestra Starter Assets trae el rig con interactores y controles configurados. No se agregaron los ejemplos de puertas, armas, cajones ni menús.
+1. Abrí la carpeta del repositorio desde Unity Hub con Unity **6000.5.1f1**.
+2. Esperá a que Unity importe los paquetes y Starter Assets. La primera vez puede tardar.
+3. Abrí `Assets/Scenes/Inicio.unity` y tocá **Play**.
+4. **JUGAR** abre el menú. **JUGAR SOLO** abre la pista y **VOLVER** regresa al inicio.
 
-## Paso a paso en tu PC
+Para usar Quest Link en Windows, conectá el visor, abrí Meta Horizon Link y elegilo como runtime OpenXR antes de tocar Play. En VR, apuntá al botón y apretá el gatillo. En la pista, acercá la mano al palo y apretá el grip para agarrarlo.
 
-1. Descomprimí el ZIP con **Extraer todo**. Dentro de la carpeta extraída tienen que aparecer **directamente** `Assets`, `Packages` y `ProjectSettings`. En Unity Hub elegí **Add > Add project from disk** y seleccioná esa carpeta, no el ZIP ni la carpeta `Assets`. Usá Unity **6000.5.1f1**. Si Unity te pide activar el nuevo Input System, aceptá y dejá que reinicie. Esperá a que termine de importar los paquetes.
-2. El proyecto importa automáticamente la muestra **Starter Assets** de XR Interaction Toolkit 3.5.1. Si no aparece, abrí **Window > Package Manager > XR Interaction Toolkit > Samples > Starter Assets > Import** y esperá a que termine la compilación.
-3. Esperá a que se creen automáticamente `Assets/Scenes/MinigolfVR.unity`, `Assets/Scenes/Inicio.unity` y `Assets/Scenes/MenuPrincipal.unity`. Elegí **Minigolf VR > Abrir pantalla de inicio** para ver la imagen y el botón. Si todavía no se crearon, elegí **Minigolf VR > Crear escena inicial** para generar primero la pista, y después **Minigolf VR > Abrir pantalla de inicio**. También podés abrir el menú con **Minigolf VR > Abrir menú principal**. Para abrir la pista directamente usá **Minigolf VR > Abrir escena inicial**.
-4. En la PC abrí **Meta Horizon Link**, establecelo como **OpenXR Runtime** y conectá el visor mediante Quest Link. En Unity elegí **Minigolf VR > Jugar con Quest Link**. El menú configura el cargador OpenXR de Windows, el perfil Oculus Touch y Direct3D11. Si aparece el aviso de Direct3D11, cerrá y volvé a abrir Unity antes de jugar.
-5. Dentro del visor se ve la pantalla Inicio y las manos azules cuando los controles están rastreados. Apuntá al botón **JUGAR** y pulsá el gatillo para entrar al menú. Elegí **JUGAR SOLO** para abrir el hoyo o **VOLVER** para regresar. **JUGAR CON AMIGOS** todavía no inicia una partida. En la pista, **grip** cierra la mano y permite agarrar el palo; **gatillo** mueve el índice. Acercá una mano al mango del palo y mantené apretado grip para agarrarlo.
+## Escenas y archivos
 
-Si el jugador aparece flotando, antes de Play elegí **Minigolf VR > Corregir altura VR**. El XR Origin usa seguimiento de piso y el script ya no mueve la cámara a una posición aérea. Comprobá también que el suelo configurado en Quest Link coincida con el suelo real.
+- `Assets/Scenes/Inicio.unity`: pantalla inicial.
+- `Assets/Scenes/MenuPrincipal.unity`: menú de juego.
+- `Assets/Scenes/MinigolfVR.unity`: pista gris, pelota, palo y un hoyo para probar VR.
+- `Assets/Scripts`: movimiento de pelota, golpes, hoyo y botones.
+- `Assets/Models`: prefabs del palo, pelota, hoyo y manos.
+- `Assets/Materials`: colores de la pista y los objetos.
 
-Si en las gafas ves una pantalla flotante con el escritorio de Windows, volvé al menú de Quest Link y comprobá que Unity realmente esté en modo Play (triángulo azul/cuadrado). Si Unity se cierra al iniciar VR, asegurate de haber reiniciado después de configurar Direct3D11.
+Las tres escenas y sus prefabs están guardados en GitHub. El proyecto incluye XR Interaction Toolkit; sus **Starter Assets** se importan desde el paquete la primera vez que Unity abre el proyecto. Las manos azules vienen de los modelos del [tutorial de Valem](https://youtu.be/H8dWVlZKQu4).
 
-## Estructura
-
-| Carpeta | Contenido |
-| --- | --- |
-| `Assets/Scenes` | Inicio, MenuPrincipal y escena de prueba, creadas al abrir Unity. Inicio es la primera escena del build. |
-| `Assets/Sprites` | Imágenes originales de Inicio y Menu, más el fondo redondeado de los botones. |
-| `Assets/Models` | Prefabs de pelota, palo y hoyo creados al abrir; modelos, animaciones y prefabs originales de manos de Valem ya incluidos. |
-| `Assets/Materials` | Colores del piso, bordes, palo, pelota, hoyo y material azul original de Valem. |
-| `Assets/Scripts` | Física de la pelota, golpe, detección del hoyo, animación de manos y acciones de los botones. |
-| `Assets/Editor` | Generación de las tres escenas y configuración de Quest Link. |
-
-Este paquete **no se compila como aplicación Android**; se ejecuta desde Unity en Windows con el visor conectado por Link. Las manos se animan al pulsar los controles; esto no es seguimiento real de cada dedo sin controles. Todavía hay que comprobar la interacción y la comodidad dentro de tus gafas. El hoyo es un disco oscuro con detector de embocada, no una perforación física del piso.
+Por ahora hay un solo hoyo. **JUGAR CON AMIGOS** muestra el botón, pero el modo multijugador todavía no está programado.

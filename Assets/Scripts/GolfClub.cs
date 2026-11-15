@@ -28,6 +28,16 @@ namespace MiniGolfVR
         private void Awake()
         {
             if (grab == null) grab = GetComponent<XRGrabInteractable>();
+            if (head == null) head = transform.Find("Cabeza del palo");
+            if (strikingCollider == null && head != null)
+                strikingCollider = head.GetComponent<BoxCollider>();
+
+            CapsuleCollider mango = GetComponent<CapsuleCollider>();
+            Transform puntoDeAgarre = transform.Find("Punto de agarre");
+            if (grab != null && mango != null && !grab.colliders.Contains(mango))
+                grab.colliders.Add(mango);
+            if (grab != null && puntoDeAgarre != null)
+                grab.attachTransform = puntoDeAgarre;
             if (strikingCollider != null) strikingCollider.enabled = false;
         }
 

@@ -12,7 +12,7 @@ namespace MiniGolfVR
         {
             if (!Application.CanStreamedLevelBeLoaded(MainMenuScene))
             {
-                Debug.Log("Minigolf VR: botón JUGAR listo. Falta crear la escena MenuPrincipal.");
+                Debug.LogError("Falta agregar MenuPrincipal a las escenas del proyecto.");
                 return;
             }
 
