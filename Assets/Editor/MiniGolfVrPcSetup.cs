@@ -1,6 +1,7 @@
 using UnityEditor;
 using UnityEditor.XR.Management;
 using UnityEditor.XR.Management.Metadata;
+using UnityEditor.XR.OpenXR.Features;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.XR.Management;
@@ -62,6 +63,7 @@ internal static class MiniGolfVrPcSetup
                 changed = true;
             }
 
+            FeatureHelpers.RefreshFeatures(Target);
             OpenXRSettings openxr = OpenXRSettings.GetSettingsForBuildTargetGroup(Target);
             if (openxr == null)
             {
