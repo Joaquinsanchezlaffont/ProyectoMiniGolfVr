@@ -11,13 +11,16 @@ namespace MiniGolfVR
 
         private void Start()
         {
-            camara = GetComponentInParent<Camera>();
+            camara = GetComponent<Canvas>().worldCamera;
         }
 
         private void Update()
         {
             if (camara == null || Mouse.current == null ||
                 !Mouse.current.leftButton.wasPressedThisFrame) return;
+
+            var visor = InputSystem.GetDevice<UnityEngine.InputSystem.XR.XRHMD>();
+            if (visor != null && visor.isTracked.isPressed) return;
 
             Vector2 posicion = Mouse.current.position.ReadValue();
             foreach (Button boton in GetComponentsInChildren<Button>())

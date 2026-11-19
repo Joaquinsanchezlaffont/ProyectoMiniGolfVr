@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.XR;
 using UnityEngine.XR;
 
 namespace MiniGolfVR
 {
-    // Las animaciones de las manos usan el grip y el gatillo de los controles.
     public sealed class AnimateHandOnInput : MonoBehaviour
     {
         [SerializeField] private InputActionProperty triggerValue;
@@ -14,25 +14,22 @@ namespace MiniGolfVR
 
         private static readonly int Grip = Animator.StringToHash("Grip");
         private static readonly int Trigger = Animator.StringToHash("Trigger");
-        private Renderer[] parts;
+        private SkinnedMeshRenderer malla;
 
-        private void Awake() => parts = GetComponentsInChildren<Renderer>(true);
+        private void Awake() => malla = GetComponentInChildren<SkinnedMeshRenderer>(true);
 
-        private void LateUpdate()
+        private void Update()
         {
-            UnityEngine.XR.InputDevice device = InputDevices.GetDeviceAtXRNode(controller);
-            bool tracked = device.isValid &&
-                (!device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.isTracked, out bool isTracked) || isTracked);
-            if (parts == null) parts = GetComponentsInChildren<Renderer>(true);
-            foreach (Renderer part in parts) part.enabled = tracked;
-            if (!tracked || handAnimator == null) return;
+            var control = controller == XRNode.LeftHand ? XRController.leftHand : XRController.rightHand;
+            bool visible = control != null && control.isTracked.isPressed;
+            malla.enabled = visible;
+            if (!visible) return;
 
-            handAnimator.SetFloat(Grip, Mathf.Clamp01(Read(gripValue)));
-            handAnimator.SetFloat(Trigger, Mathf.Clamp01(Read(triggerValue)));
+            handAnimator.SetFloat(Grip, Leer(gripValue));
+            handAnimator.SetFloat(Trigger, Leer(triggerValue));
         }
 
-        private static float Read(InputActionProperty property) =>
-            property.action != null && property.action.enabled
-                ? property.action.ReadValue<float>() : 0f;
+        private static float Leer(InputActionProperty entrada) =>
+            entrada.action == null ? 0f : entrada.action.ReadValue<float>();
     }
 }
