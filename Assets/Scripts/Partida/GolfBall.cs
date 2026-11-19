@@ -18,12 +18,19 @@ namespace MiniGolfVR
 
         public void ResetAt(Vector3 position)
         {
-            Body.position = position;
-            Body.rotation = Quaternion.identity;
             Body.linearVelocity = Vector3.zero;
             Body.angularVelocity = Vector3.zero;
+            Body.constraints = RigidbodyConstraints.FreezeAll;
+            Body.position = position;
+            Body.rotation = Quaternion.identity;
             Body.Sleep();
-            transform.SetPositionAndRotation(position, Quaternion.identity);
+        }
+
+        public void Golpear(Vector3 impulso)
+        {
+            Body.constraints = RigidbodyConstraints.None;
+            Body.WakeUp();
+            Body.AddForce(impulso, ForceMode.Impulse);
         }
     }
 }

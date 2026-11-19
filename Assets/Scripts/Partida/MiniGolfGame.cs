@@ -1,57 +1,108 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace MiniGolfVR
 {
-    // Prueba de un hoyo: la pelota vuelve al inicio después de entrar o caerse.
     public sealed class MiniGolfGame : MonoBehaviour
     {
         [SerializeField] private Transform tee;
         [SerializeField] private HoleCup cup;
         [SerializeField] private GolfBall ball;
-        private float lastStrikeAt = -100f;
-        private float respawnAt = -1f;
+        [SerializeField] private GolfClub palo;
+        [SerializeField, Min(0.01f)] private float impulsoMaximo = 0.65f;
 
-        private void Start() => ResetBall();
+        private Vector3[] posiciones;
+        private float tiempoQuieta;
+        private double habilitarGolpe;
+        private float fuerzaDelTiro;
+        private int ultimoJugador = -1;
+        private double mostrarGolpeHasta;
+
+        public PartidaHoyo Partida { get; private set; }
+        public Vector3 InicioDelTiro => posiciones[Partida.Turno];
+        public bool MuestraUltimoGolpe => Partida.TiroEnCurso ||
+            (Partida.Turno == ultimoJugador && Ahora < mostrarGolpeHasta);
+        public float Fuerza => MuestraUltimoGolpe ? fuerzaDelTiro : palo.Fuerza;
+        private static double Ahora => Time.realtimeSinceStartupAsDouble;
+
+        private void Start()
+        {
+            if (tee == null || cup == null || ball == null || palo == null)
+            {
+                Debug.LogError("Falta asignar una referencia de la pista.", this);
+                enabled = false;
+                return;
+            }
+            Partida = new PartidaHoyo(SesionMinigolf.Jugadores, Ahora);
+            posiciones = new Vector3[Partida.Jugadores];
+            for (int i = 0; i < posiciones.Length; i++) posiciones[i] = tee.position;
+
+            // El mango sirve para agarrar el palo. La cabeza es la que golpea la pelota.
+            Physics.IgnoreCollision(palo.GetComponent<CapsuleCollider>(), ball.GetComponent<SphereCollider>());
+            PrepararTurno();
+        }
 
         private void Update()
         {
-            if (ball == null || tee == null) return;
-            if (respawnAt > 0f && Time.time >= respawnAt)
-            {
-                respawnAt = -1f;
-                ResetBall();
-            }
-            else if (respawnAt < 0f && ball.transform.position.y < -1f)
-                ResetBall();
+            Partida.RevisarTiempo(Ahora);
+            if (!Partida.Terminada) return;
+            enabled = false;
+            SesionMinigolf.Resultado = Partida;
+            SceneManager.LoadScene("MenuPrincipal");
         }
 
-        public bool TryStrike(GolfBall target, Vector3 direction, float power)
+        public bool TryStrike(GolfBall pelota, Vector3 direccion, float fuerza)
         {
-            if (target != ball || respawnAt > 0f || Time.time - lastStrikeAt < 0.35f ||
-                ball.Body.linearVelocity.sqrMagnitude > 0.05f)
-                return false;
+            if (Partida == null || pelota != ball || Ahora < habilitarGolpe || fuerza <= 0) return false;
+            direccion.y = 0;
+            if (direccion.sqrMagnitude < 0.0001f || !Partida.AnotarGolpe(Ahora)) return false;
 
-            direction = Vector3.ProjectOnPlane(direction, Vector3.up);
-            if (direction.sqrMagnitude < 0.001f) return false;
-            ball.Body.WakeUp();
-            ball.Body.AddForce(direction.normalized * Mathf.Lerp(0.12f, 0.65f,
-                Mathf.Clamp01(power)), ForceMode.Impulse);
-            lastStrikeAt = Time.time;
+            fuerzaDelTiro = Mathf.Clamp01(fuerza);
+            ultimoJugador = Partida.Turno;
+            mostrarGolpeHasta = Ahora + 1;
+            ball.Golpear(direccion.normalized * (fuerzaDelTiro * impulsoMaximo));
+            tiempoQuieta = 0f;
             return true;
         }
 
-        public void BallEnteredCup(HoleCup target, GolfBall golfBall)
+        private void FixedUpdate()
         {
-            if (target != cup || golfBall != ball || respawnAt > 0f) return;
-            ball.Body.linearVelocity = Vector3.zero;
-            ball.Body.angularVelocity = Vector3.zero;
-            respawnAt = Time.time + 1f;
+            if (Partida == null || !Partida.TiroEnCurso) return;
+            if (ball.Body.position.y < tee.position.y - 0.6f)
+            {
+                // Si sale de la pista conserva el golpe y vuelve a la posición anterior.
+                CerrarTiro(false);
+                return;
+            }
+            if (ball.Body.linearVelocity.sqrMagnitude > 0.01f)
+            {
+                tiempoQuieta = 0f;
+                return;
+            }
+
+            tiempoQuieta += Time.fixedDeltaTime;
+            if (tiempoQuieta < 0.3f) return;
+            posiciones[Partida.Turno] = ball.Body.position;
+            CerrarTiro(false);
         }
 
-        private void ResetBall()
+        public void BallEnteredCup(HoleCup hoyo, GolfBall pelota)
         {
-            if (ball != null && tee != null)
-                ball.ResetAt(tee.position);
+            if (hoyo == cup && pelota == ball && Partida != null && Partida.TiroEnCurso)
+                CerrarTiro(true);
+        }
+
+        private void CerrarTiro(bool entro)
+        {
+            Partida.CerrarTiro(entro, Ahora);
+            if (!Partida.Terminada) PrepararTurno();
+        }
+
+        private void PrepararTurno()
+        {
+            ball.ResetAt(InicioDelTiro);
+            tiempoQuieta = 0f;
+            habilitarGolpe = Ahora + 0.45;
         }
     }
 }

@@ -10,55 +10,50 @@ namespace MiniGolfVR
         [SerializeField] private Collider strikingCollider;
         [SerializeField] private MiniGolfGame game;
         [SerializeField] private XRGrabInteractable grab;
+        [SerializeField, Min(0.1f)] private float velocidadMaxima = 2.5f;
 
-        private Vector3 previousHeadPosition;
-        private Vector3 headVelocity;
-        private bool wasHeld;
-        private float nextHitAt;
+        public float Fuerza { get; private set; }
+        private Vector3 posicionAnterior;
+        private Vector3 velocidad;
+        private bool agarrado;
+        private bool golpeDado;
+        private float listoDesde;
 
         private void Awake()
         {
-            if (grab == null) grab = GetComponent<XRGrabInteractable>();
-            if (head == null) head = transform.Find("Cabeza del palo");
-            if (strikingCollider == null && head != null)
-                strikingCollider = head.GetComponent<BoxCollider>();
-
-            CapsuleCollider mango = GetComponent<CapsuleCollider>();
-            Transform puntoDeAgarre = transform.Find("Punto de agarre");
-            if (grab != null && mango != null && !grab.colliders.Contains(mango))
-                grab.colliders.Add(mango);
-            if (grab != null && puntoDeAgarre != null)
-                grab.attachTransform = puntoDeAgarre;
-            if (strikingCollider != null) strikingCollider.enabled = false;
+            if (head == null || strikingCollider == null || grab == null)
+            {
+                Debug.LogError("Revisá la cabeza, el collider y el agarre del palo.", this);
+                enabled = false;
+                return;
+            }
+            strikingCollider.enabled = false;
         }
 
         private void FixedUpdate()
         {
-            bool held = grab != null && grab.isSelected && head != null;
-            if (strikingCollider != null) strikingCollider.enabled = held;
-
-            if (held)
-            {
-                Vector3 position = head.position;
-                headVelocity = wasHeld
-                    ? (position - previousHeadPosition) / Time.fixedDeltaTime
-                    : Vector3.zero;
-                previousHeadPosition = position;
-            }
-            else headVelocity = Vector3.zero;
-            wasHeld = held;
+            bool enLaMano = grab.isSelected;
+            if (enLaMano && !agarrado) listoDesde = Time.fixedTime + 0.18f;
+            // Al agarrarlo, el palo primero se acomoda a la mano.
+            strikingCollider.enabled = enLaMano && Time.fixedTime >= listoDesde;
+            velocidad = strikingCollider.enabled && agarrado
+                ? Vector3.ProjectOnPlane((head.position - posicionAnterior) / Time.fixedDeltaTime, Vector3.up)
+                : Vector3.zero;
+            float rapidez = velocidad.magnitude;
+            Fuerza = rapidez < 0.35f ? 0f : Mathf.Clamp01(rapidez / velocidadMaxima);
+            if (!enLaMano || Fuerza == 0f) golpeDado = false;
+            posicionAnterior = head.position;
+            agarrado = enLaMano;
         }
 
-        private void OnTriggerStay(Collider other)
-        {
-            if (!wasHeld || Time.time < nextHitAt || game == null) return;
-            GolfBall ball = other.GetComponent<GolfBall>();
-            if (ball == null) return;
+        private void OnTriggerEnter(Collider otro) => ProbarGolpe(otro);
+        private void OnTriggerStay(Collider otro) => ProbarGolpe(otro);
 
-            Vector3 horizontalVelocity = Vector3.ProjectOnPlane(headVelocity, Vector3.up);
-            if (horizontalVelocity.magnitude < 0.35f) return;
-            float power = Mathf.InverseLerp(0.35f, 2.5f, horizontalVelocity.magnitude);
-            if (game.TryStrike(ball, horizontalVelocity, power)) nextHitAt = Time.time + 0.5f;
+        private void ProbarGolpe(Collider otro)
+        {
+            if (!agarrado || golpeDado || Fuerza <= 0f || game == null) return;
+            if (otro.TryGetComponent(out GolfBall pelota))
+                golpeDado = game.TryStrike(pelota, velocidad, Fuerza);
         }
     }
 }
