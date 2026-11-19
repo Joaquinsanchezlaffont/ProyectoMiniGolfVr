@@ -34,6 +34,22 @@ namespace MiniGolfVR
 
         public int GolpesDe(int jugador) => golpes[jugador];
 
+        public int[] OrdenPorGolpes()
+        {
+            int[] orden = new int[Jugadores];
+            for (int i = 0; i < Jugadores; i++) orden[i] = i;
+            for (int i = 1; i < orden.Length; i++)
+            {
+                for (int j = i; j > 0 && golpes[orden[j]] < golpes[orden[j - 1]]; j--)
+                {
+                    int anterior = orden[j - 1];
+                    orden[j - 1] = orden[j];
+                    orden[j] = anterior;
+                }
+            }
+            return orden;
+        }
+
         public int SegundosDeJuego(double ahora)
         {
             return (int)((Terminada ? fin : ahora) - inicio);

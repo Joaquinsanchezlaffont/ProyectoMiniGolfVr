@@ -45,6 +45,10 @@ class ReglasDelHoyo
             hoyo.RevisarTiempo(inicioMinuto + 100);
             Comprobar(hoyo.Terminada && hoyo.Penalizado == 0 && hoyo.GolpesDe(0) == 8,
                 "Al vencer: tres golpes hechos más cinco, una sola vez");
+            int[] orden = hoyo.OrdenPorGolpes();
+            Comprobar(orden[0] == 1 && orden[cantidad - 1] == 0, "El resultado incluye la penalidad");
+            for (int j = 0; j < cantidad - 1; j++)
+                Comprobar(orden[j] == j + 1, "Los empatados conservan el orden de jugador");
         }
 
         var empate = new PartidaHoyo(2, 0);
@@ -60,6 +64,12 @@ class ReglasDelHoyo
         Tiro(tres, false, 2);
         Tiro(tres, false, 3);
         Comprobar(tres.Turno == 2 && !tres.EnUltimoMinuto, "Se salta al que ya embocó");
+
+        var sinTirar = new PartidaHoyo(2, 10);
+        Tiro(sinTirar, true, 11);
+        sinTirar.RevisarTiempo(71);
+        Comprobar(sinTirar.GolpesDe(1) == 5 && !sinTirar.AnotarGolpe(72),
+            "El reloj también vence si el último jugador no tira");
         Console.WriteLine("OK: solo, turnos de 2 a 4, reloj, penalidad y empate.");
     }
 }
