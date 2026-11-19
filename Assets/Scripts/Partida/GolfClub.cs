@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 namespace MiniGolfVR
 {
@@ -32,7 +33,9 @@ namespace MiniGolfVR
 
         private void FixedUpdate()
         {
-            bool enLaMano = grab.isSelected;
+            bool enLaMano = false;
+            foreach (var interactor in grab.interactorsSelecting)
+                if (!(interactor is XRSocketInteractor)) enLaMano = true;
             if (enLaMano && !agarrado) listoDesde = Time.fixedTime + 0.18f;
             // Al agarrarlo, el palo primero se acomoda a la mano.
             strikingCollider.enabled = enLaMano && Time.fixedTime >= listoDesde;
