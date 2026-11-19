@@ -12,6 +12,8 @@ namespace MiniGolfVR
 
         private int jugadorAnterior = -1, golpesAnteriores = -1, segundoAnterior = -1, fuerzaAnterior = -1;
         private bool cuentaAtras, ultimoGolpe;
+        private static readonly Color ColorDelMinuto = new Color32(255, 205, 106, 255);
+        private static readonly Color ColorDeAviso = new Color32(255, 162, 143, 255);
 
         private void LateUpdate()
         {
@@ -42,9 +44,10 @@ namespace MiniGolfVR
             {
                 segundoAnterior = segundos;
                 cuentaAtras = partida.EnUltimoMinuto;
-                tituloReloj.text = cuentaAtras ? "ÚLTIMO MINUTO" : "TIEMPO";
+                bool quedanDiez = cuentaAtras && segundos <= 10;
+                tituloReloj.text = quedanDiez ? "ÚLTIMOS 10 S" : cuentaAtras ? "ÚLTIMO MINUTO" : "TIEMPO";
                 reloj.text = $"{segundos / 60}:{segundos % 60:00}";
-                reloj.color = cuentaAtras ? new Color32(255, 205, 106, 255) : Color.white;
+                reloj.color = quedanDiez ? ColorDeAviso : cuentaAtras ? ColorDelMinuto : Color.white;
             }
 
             int fuerza = Mathf.RoundToInt(juego.Fuerza * 100f);

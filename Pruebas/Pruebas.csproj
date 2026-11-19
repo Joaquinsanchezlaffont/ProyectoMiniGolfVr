@@ -5,5 +5,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../Assets/Scripts/Partida/PartidaHoyo.cs" />
+    <Compile Include="../Assets/Scripts/Partida/FuerzaDelGolpe.cs" />
   </ItemGroup>
 </Project>

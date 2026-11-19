@@ -2,7 +2,7 @@ name: Reglas del hoyo
 on:
   push:
     paths:
-      - 'Assets/Scripts/Partida/PartidaHoyo.cs'
+      - 'Assets/Scripts/Partida/*.cs'
       - 'Pruebas/**'
       - '.github/workflows/probar-hoyo.yml'
 permissions:

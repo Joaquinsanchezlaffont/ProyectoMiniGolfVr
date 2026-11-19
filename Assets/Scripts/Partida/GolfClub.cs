@@ -10,7 +10,7 @@ namespace MiniGolfVR
         [SerializeField] private Collider strikingCollider;
         [SerializeField] private MiniGolfGame game;
         [SerializeField] private XRGrabInteractable grab;
-        [SerializeField, Min(0.1f)] private float velocidadMaxima = 2.5f;
+        [SerializeField, Min(FuerzaDelGolpe.VelocidadMinima)] private float velocidadMaxima = 2.5f;
 
         public float Fuerza { get; private set; }
         private Vector3 posicionAnterior;
@@ -39,8 +39,7 @@ namespace MiniGolfVR
             velocidad = strikingCollider.enabled && agarrado
                 ? Vector3.ProjectOnPlane((head.position - posicionAnterior) / Time.fixedDeltaTime, Vector3.up)
                 : Vector3.zero;
-            float rapidez = velocidad.magnitude;
-            Fuerza = rapidez < 0.35f ? 0f : Mathf.Clamp01(rapidez / velocidadMaxima);
+            Fuerza = FuerzaDelGolpe.Medir(velocidad.magnitude, velocidadMaxima);
             if (!enLaMano || Fuerza == 0f) golpeDado = false;
             posicionAnterior = head.position;
             agarrado = enLaMano;

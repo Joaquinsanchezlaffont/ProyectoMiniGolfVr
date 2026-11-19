@@ -16,6 +16,10 @@ class ReglasDelHoyo
 
     static void Main()
     {
+        Comprobar(FuerzaDelGolpe.Medir(0.34f, 2.5f) == 0f, "Un temblor de la mano no golpea");
+        Comprobar(FuerzaDelGolpe.Medir(1.25f, 2.5f) == 0.5f, "La mitad de velocidad da 50%");
+        Comprobar(FuerzaDelGolpe.Medir(2.5f, 2.5f) == 1f && FuerzaDelGolpe.Medir(5f, 2.5f) == 1f,
+            "Un golpe fuerte no supera el 100%");
         var solo = new PartidaHoyo(1, 0);
         solo.CerrarTiro(true, 0);
         Comprobar(!solo.Terminada, "Un contacto sin golpe no cuenta");
@@ -70,6 +74,6 @@ class ReglasDelHoyo
         sinTirar.RevisarTiempo(71);
         Comprobar(sinTirar.GolpesDe(1) == 5 && !sinTirar.AnotarGolpe(72),
             "El reloj también vence si el último jugador no tira");
-        Console.WriteLine("OK: solo, turnos de 2 a 4, reloj, penalidad y empate.");
+        Console.WriteLine("OK: fuerza, solo, turnos de 2 a 4, reloj, penalidad y empate.");
     }
 }
