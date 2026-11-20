@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.XR;
 using UnityEngine.XR;
+using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
 
 namespace MiniGolfVR
 {
@@ -16,7 +17,17 @@ namespace MiniGolfVR
         private static readonly int Trigger = Animator.StringToHash("Trigger");
         private SkinnedMeshRenderer malla;
 
-        private void Awake() => malla = GetComponentInChildren<SkinnedMeshRenderer>(true);
+        private void Awake()
+        {
+            malla = GetComponentInChildren<SkinnedMeshRenderer>(true);
+            // El rayo aparece sobre un botón u objeto, pero no queda dibujado en el aire.
+            var rayo = transform.parent.GetComponentInChildren<CurveVisualController>(true);
+            if (rayo != null)
+            {
+                rayo.noValidHitProperties.startWidth = 0;
+                rayo.noValidHitProperties.endWidth = 0;
+            }
+        }
 
         private void Update()
         {
